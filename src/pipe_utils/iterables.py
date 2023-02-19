@@ -1,3 +1,7 @@
+"""
+Contains several utility functions to support processing iterables
+"""
+
 import functools
 import itertools
 from collections import defaultdict, deque
@@ -12,9 +16,11 @@ H = TypeVar("H", bound=Hashable)
 E = TypeVar("E", bound=BaseException)
 EType = Type[E] | tuple[Type[E], ...]
 
-Iter = Callable[[Iterable[T]], Iterable[T]]
-NestedIter = Callable[[Iterable[T]], Iterable[Iterable[T]]]
+Nested = Iterable[Iterable[T]]
 Map = Callable[[T], V]
+
+Iter = Callable[[Iterable[T]], Iterable[T]]
+NestedIter = Callable[[Iterable[T]], Nested]
 IterMap = Callable[[Iterable[T]], Iterable[V]]
 
 Predicate = Callable[[T], bool]
@@ -70,16 +76,20 @@ __all__ = [
     "partition",
     "peek",
     "reduce",
+    "remove",
+    "remove_last",
     "scan",
     "slice_",
     "sorted_by",
     "sorted_desc",
     "sorted_desc_by",
     "starmap",
+    "starred",
     "take",
     "take_last",
     "take_last_while",
     "take_while",
+    "transpose",
     "try_map",
     "windowed",
     "unzip",
@@ -555,7 +565,42 @@ def reduce(func: Callable[[T, T], T]) -> Reducer:
     return lambda data: functools.reduce(func, data)
 
 
-# ToDo remove, removeall, removelast, etc.
+def remove(value: T) -> Iter:
+    """
+    Returns a callable that returns all the values from a given iterable
+    except the first occurrence of the given value
+    """
+
+    def _func(data):
+        it = iter(data)
+        yield from take_while(lambda e: e != value)(it)
+        yield from it
+
+    return _func
+
+
+def remove_last(value: T) -> Iter:
+    """
+    Returns a callable that returns all the values from a given iterable
+    except the last occurrence of the given value
+    """
+
+    def _func(data):
+        it = iter(data)
+        queue = deque()
+        for e in it:
+            if e == value:
+                yield from queue
+                queue = deque((e,))
+            elif queue:
+                queue.append(e)
+            else:
+                yield e
+        if queue:
+            queue.popleft()
+        yield from queue
+
+    return _func
 
 
 def scan(func: Callable[[T, T], T], initial=None) -> Iter:
@@ -607,7 +652,16 @@ def sorted_desc_by(func: Map) -> Iter:
 
 
 def starmap(func: Callable[[...], T]) -> Iter:
+    """Returns a callable that returns the mapped starred values"""
     return lambda data: itertools.starmap(func, data)
+
+
+def starred(func: Callable[[...], V], **kwargs) -> IterMap:
+    """
+    Returns a callable that takes in data and calls func with the data starred.
+    Kwargs are passed to the function.
+    """
+    return lambda data: func(*data, **kwargs)
 
 
 def take(n: int = 1) -> Iter:
@@ -659,6 +713,11 @@ def take_while(func: Predicate) -> Iter:
     satisfy the given predicate
     """
     return lambda data: itertools.takewhile(func, data)
+
+
+def transpose(data: Nested) -> Nested:
+    """Returns the data transposed. e.g. [[1, 2], [3, 4]] -> [[1, 3], [2, 4]]"""
+    return zip(*data)
 
 
 def try_map(

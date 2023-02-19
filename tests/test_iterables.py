@@ -1,4 +1,5 @@
 from fractions import Fraction
+from io import StringIO
 from operator import add
 
 from pytest import raises
@@ -375,6 +376,22 @@ def test_reduce():
     assert pipe.get() == 1
 
 
+def test_remove():
+    assert (Pipe([1, 2, 3, 2]) | remove(2) | list).get() == [1, 3, 2]
+    assert (Pipe([1, 2, 3, 2]) | remove(4) | list).get() == [1, 2, 3, 2]
+    assert (Pipe([]) | remove(4) | list).get() == []
+    assert (Pipe([1]) | remove(1) | list).get() == []
+
+
+def test_remove_last():
+    assert (Pipe([1, 2, 3, 2]) | remove_last(2) | list).get() == [1, 2, 3]
+    assert (Pipe([1, 2, 3, 2]) | remove_last(3) | list).get() == [1, 2, 2]
+    assert (Pipe([1, 2, 3, 2]) | remove_last(1) | list).get() == [2, 3, 2]
+    assert (Pipe([1, 2, 3, 2]) | remove_last(4) | list).get() == [1, 2, 3, 2]
+    assert (Pipe([]) | remove_last(4) | list).get() == []
+    assert (Pipe([1]) | remove_last(1) | list).get() == []
+
+
 def test_scan():
     assert (Pipe([]) | scan(add) | list).get() == []
     assert (Pipe([1]) | scan(add) | list).get() == [1]
@@ -411,6 +428,13 @@ def test_starmap():
     assert (Pipe([]) | starmap(pow) | list).get() == []
     pipe = (Pipe([(2, 5), (3, 2), (10, 3)]) | starmap(pow) | list)
     assert pipe.get() == [32, 9, 1000]
+
+
+def test_starred():
+    assert (Pipe([1, 2]) | starred(add)).get() == 3
+    stream = StringIO()
+    (Pipe([1, 2]) | starred(print, file=stream, sep="~", end="")).get()
+    assert stream.getvalue() == "1~2"
 
 
 def test_take():
@@ -457,6 +481,16 @@ def test_take_while():
     assert (Pipe([1, 2]) | take_while(is_even) | list).get() == []
     assert (Pipe([2, 4, 6]) | take_while(is_even) | list).get() == [2, 4, 6]
     assert (Pipe([2, 1, 4, 6]) | take_while(is_even) | list).get() == [2]
+
+
+def test_transpose():
+    assert (Pipe(range(6)) | chunked(2) | transpose | map_(tuple) | tuple
+            ).get() == ((0, 2, 4), (1, 3, 5))
+
+    assert Pipe([]).then(transpose).then(list).get() == []
+    assert (Pipe([[1]]) | transpose | map_(list) | list).get() == [[1]]
+    assert (Pipe([[1, 2]]) | transpose | map_(list) | list).get() == [[1], [2]]
+    assert (Pipe([[1], [2]]) | transpose | map_(list) | list).get() == [[1, 2]]
 
 
 def test_try_map():

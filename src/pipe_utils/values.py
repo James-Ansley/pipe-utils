@@ -1,3 +1,7 @@
+"""
+Contains several utility functions to support processing single values
+"""
+
 import operator
 from collections.abc import Callable
 from typing import Any, Protocol, TypeVar
