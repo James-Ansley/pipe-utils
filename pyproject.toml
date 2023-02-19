@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pipe-utils"
-version = "0.0.1a1"
+version = "0.0.1a2"
 description = 'Python with pipes, utils, and pipe utils'
 
 readme = "README.md"
