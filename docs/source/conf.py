@@ -47,8 +47,9 @@ autodoc_default_options = {
     "undoc-members": True,
     "show-inheritance": True,
     "imported-members": True,
-
+    "python_use_unqualified_type_names": True,
 }
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
+autodoc_typehints_format = "short"
 python_use_unqualified_type_names = True
