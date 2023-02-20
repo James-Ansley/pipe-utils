@@ -8,6 +8,7 @@ Python but with pipes, utils, and pipe utils
    :caption: Contents:
 
    quickstart
+   pipe_objects
    api
 
 Indices and tables

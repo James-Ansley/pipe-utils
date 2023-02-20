@@ -776,7 +776,7 @@ def unzip(
         data: Iterable[Sequence[T, V]] | Mapping[T, V]
 ) -> tuple[Iterable[T], Iterable[V]]:
     """
-    Returns a tuple of two iterables, the first cotnains the first element of
+    Returns a tuple of two iterables, the first contains the first element of
     the given data, the second iterable contains the second element form the
     given data
     """

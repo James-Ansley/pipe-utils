@@ -52,7 +52,7 @@ class Pipe(Generic[T, R]):
     ) -> "Pipe[R]":
         """
         Returns a new pipe containing the result of calling
-        func(*args, **kwargs)
+        func(data, *args, **kwargs)
         """
         if self._err is not None:
             return self

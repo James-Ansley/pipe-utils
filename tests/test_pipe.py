@@ -8,13 +8,13 @@ from pipe_utils.pipe import Args
 
 def test_pipe_yields_data():
     assert Pipe(5).get() == 5
-    assert Pipe([1, 2, 3]).get_or_else([2, 4, 8]) == [1, 2, 3]
+    assert Pipe([1, 2, 3]).get_or_default([2, 4, 8]) == [1, 2, 3]
     assert Pipe("Hello").get_or_raise(ValueError) == "Hello"
 
 
 def test_pipe_then_yield():
     assert Pipe(5).then(str).get() == "5"
-    assert Pipe("Hello").then(len).get_or_else(-1) == 5
+    assert Pipe("Hello").then(len).get_or_default(-1) == 5
     assert Pipe([3, 2, 1]).then(sorted).get_or_raise(ValueError) == [1, 2, 3]
 
 
@@ -41,7 +41,7 @@ def test_err_is_caught():
             | (lambda data: map(lambda x: 1 / x, data))
             | list
     )
-    assert pipe.get_or_else(-1) == -1
+    assert pipe.get_or_default(-1) == -1
 
     with raises(ZeroDivisionError):
         pipe.get()
