@@ -72,5 +72,5 @@ Which prints::
 
     {1: ['i'], 3: ['are'], 4: ['cool'], 5: ['think', 'pipes']}
 
-Here, the :func:`pipe_utils.iterables.group_by`, and :func:`pipe_utils.mappings.sorted_dict` functions are both utility functions provided by pipe-utils.
-:func:`pipe_utils.iterables.group_by` takes a key function that is used to group values by, and :func:`pipe_utils.mappings.sorted_dict` can be used directly as a callable.
+Here, the :func:`~pipe_utils.iterables.group_by`, and :func:`~pipe_utils.mappings.sorted_dict` functions are both utility functions provided by pipe-utils.
+:func:`~pipe_utils.iterables.group_by` takes a key function that is used to group values by, and :func:`~pipe_utils.mappings.sorted_dict` can be used directly as a callable.
