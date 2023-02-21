@@ -424,6 +424,36 @@ def test_sorted_desc_by():
             | sorted_desc_by(len)).get() == ["ab", "cd", "a", "b"]
 
 
+def test_split_by():
+    assert (Pipe([]) | split_by(0) | map_(list) | list).get() == [[]]
+    assert (Pipe([1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9])
+            | split_by(0)
+            | map_(list)
+            | list
+            ).get() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert (Pipe([1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9])
+            | split_by(999)
+            | map_(list)
+            | list
+            ).get() == [[1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9]]
+    assert (Pipe([1, 2, 3, -999, 4, 5, 6, 0, 7, 8, 9])
+            | split_by(0, -999)
+            | map_(list)
+            | list
+            ).get() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert (Pipe([1, 2, 3, 0, 0, 4, 5, 6, 0, 7, 8, 9])
+            | split_by(0, -999)
+            | map_(list)
+            | list
+            ).get() == [[1, 2, 3], [], [4, 5, 6], [7, 8, 9]]
+
+    assert (Pipe([0, 1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9, 0])
+            | split_by(0)
+            | map_(list)
+            | list
+            ).get() == [[], [1, 2, 3], [4, 5, 6], [7, 8, 9], []]
+
+
 def test_starmap():
     assert (Pipe([]) | starmap(pow) | list).get() == []
     pipe = (Pipe([(2, 5), (3, 2), (10, 3)]) | starmap(pow) | list)

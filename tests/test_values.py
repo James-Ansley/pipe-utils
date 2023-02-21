@@ -3,6 +3,24 @@ from fractions import Fraction
 from pipe_utils.values import *
 
 
+def test_not():
+    assert not_(is_even)(5)
+    assert not not_(is_even)(4)
+
+
+def test_or():
+    assert or_(is_even, gt(4))(2)
+    assert or_(is_even, gt(4))(5)
+    assert not or_(is_even, gt(4))(1)
+
+
+def test_and():
+    assert and_(is_even, gt(4))(10)
+    assert not and_(is_even, gt(4))(2)
+    assert not and_(is_even, gt(4))(5)
+    assert not and_(is_even, gt(4))(1)
+
+
 def test_is_even():
     assert is_even(-2)
     assert not is_even(-1)

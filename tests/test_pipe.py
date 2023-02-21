@@ -3,7 +3,7 @@ from io import StringIO
 from pytest import raises
 
 from pipe_utils import Pipe
-from pipe_utils.pipe import Args
+from pipe_utils.pipe import Then
 
 
 def test_pipe_yields_data():
@@ -52,11 +52,11 @@ def test_err_is_caught():
 
 def test_args():
     stream = StringIO()
-    Pipe("Hello") | Args(print, end=", World", file=stream)
+    Pipe("Hello") | Then(print, end=", World", file=stream)
     assert stream.getvalue() == "Hello, World"
 
     stream = StringIO()
-    Pipe("one") | Args(print, "two", end="-three", sep="-", file=stream)
+    Pipe("one") | Then(print, "two", end="-three", sep="-", file=stream)
     assert stream.getvalue() == "one-two-three"
 
 

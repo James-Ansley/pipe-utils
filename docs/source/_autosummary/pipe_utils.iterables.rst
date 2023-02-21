@@ -1,4 +1,4 @@
-pipe\_utils.iterables
+﻿pipe\_utils.iterables
 =====================
 
 .. automodule:: pipe_utils.iterables
@@ -61,6 +61,7 @@ pipe\_utils.iterables
       sorted_by
       sorted_desc
       sorted_desc_by
+      split_by
       starmap
       starred
       take

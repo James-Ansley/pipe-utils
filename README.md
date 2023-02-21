@@ -2,8 +2,6 @@
 
 Python with pipes, utils, and pipe utils.
 
-> Note: pipe-utils is in alpha and significant API changes are expected
-
 ```python
 from pipe_utils import Pipe
 from pipe_utils.iterables import *
@@ -28,3 +26,8 @@ print(data)
 ```
 pip install pipe-utils
 ```
+
+
+## Docs
+
+https://pipe-utils.rtfd.io

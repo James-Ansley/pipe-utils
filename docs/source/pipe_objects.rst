@@ -90,14 +90,14 @@ For example::
 
 In this example, it might be cleaner to use the :func:`~pipe_utils.values.add_by` and :func:`~pipe_utils.values.mul_by` functions that use currying for slightly cleaner code.
 
-If kwargs are needed, an :class:`~pipe_utils.pipes.Args` object can be constructed with any additional args or kwargs.::
+If kwargs are needed, an :class:`~pipe_utils.pipes.Then` object can be constructed with any additional args or kwargs.::
 
     from pipe_utils import Pipe
-    from pipe_utils.pipe import Args
+    from pipe_utils.pipe import Then
 
     data = (
             Pipe(["a", "ab", "abc", "abcd"])
-            | Args(sorted, reverse=True, key=len)
+            | Then(sorted, reverse=True, key=len)
     ).get()
 
     print(data)  # ['abcd', 'abc', 'ab', 'a']

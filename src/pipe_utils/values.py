@@ -9,8 +9,14 @@ from typing import Any, Protocol, TypeVar
 T = TypeVar("T")
 V = TypeVar("V")
 R = TypeVar("R")
+Predicate = Callable[[T], bool]
+
+nothing = object()
 
 __all__ = [
+    "not_",
+    "or_",
+    "and_",
     "is_even",
     "is_odd",
     "is_congruent",
@@ -50,6 +56,21 @@ class SupportsLE(Protocol[T, V]):
 class SupportsGE(Protocol[T, V]):
     def __ge__(self: T, other: V) -> bool:
         ...
+
+
+def not_(func: Predicate) -> Predicate:
+    """Returns a predicate equal to (it) -> not func(it)"""
+    return lambda item: not func(item)
+
+
+def or_(cond1: Predicate, cond2: Predicate) -> Predicate:
+    """Returns a predicate equal to (it) -> cond1(it) or cond2(it)"""
+    return lambda item: cond1(item) or cond2(item)
+
+
+def and_(cond1: Predicate, cond2: Predicate) -> Predicate:
+    """Returns a predicate equal to (it) -> cond1(it) and cond2(it)"""
+    return lambda item: cond1(item) and cond2(item)
 
 
 def is_even(item: int) -> bool:

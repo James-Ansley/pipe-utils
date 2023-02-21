@@ -83,6 +83,7 @@ __all__ = [
     "sorted_by",
     "sorted_desc",
     "sorted_desc_by",
+    "split_by",
     "starmap",
     "starred",
     "take",
@@ -649,6 +650,20 @@ def sorted_desc_by(func: Map) -> Iter:
     key function
     """
     return lambda data: sorted(data, key=func, reverse=True)
+
+
+def split_by(*separators: T) -> NestedIter:
+    def _func(data):
+        next_ = deque()
+        for e in data:
+            if e not in separators:
+                next_.append(e)
+            else:
+                yield next_
+                next_ = deque()
+        yield next_
+
+    return _func
 
 
 def starmap(func: Callable[[...], T]) -> Iter:

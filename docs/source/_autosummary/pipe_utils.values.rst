@@ -1,4 +1,4 @@
-pipe\_utils.values
+﻿pipe\_utils.values
 ==================
 
 .. automodule:: pipe_utils.values
@@ -14,6 +14,7 @@ pipe\_utils.values
    .. autosummary::
    
       add_by
+      and_
       bit_and
       bit_or
       bit_xor
@@ -38,6 +39,8 @@ pipe\_utils.values
       mod_by
       mul_by
       ne
+      not_
+      or_
       rshift
       sub_by
       to_power

@@ -1,18 +1,18 @@
 from collections.abc import Callable, Iterable
-from typing import Generic, ParamSpec, Type, TypeVar
+from typing import Generic, Type, TypeVar
 
-__all__ = ["Args", "Pipe"]
+__all__ = ["Then", "Pipe"]
 
-T = ParamSpec("T")
+T = TypeVar("T")
 R = TypeVar("R")
 V = TypeVar("V")
 E = TypeVar("E", bound=BaseException)
 Handler = Callable[[E], R]
 ExceptionType = Type[E] | tuple[Type[E], ...]
-_Args = "Callable[[T], R] | Iterable[Callable[[T], R], ...] | Args"
+_Args = "Callable[[T], R] | Iterable[Callable[[T], R], ...] | Then"
 
 
-class Args:
+class Then:
     """
     Container class used to store a func along with additional args and kwargs.
     Is intended to be used with `Pipe.__or__` (`|`).
@@ -47,8 +47,8 @@ class Pipe(Generic[T, R]):
     def then(
             self,
             func: Callable[[T], R],
-            *args: T.args,
-            **kwargs: T.kwargs
+            *args,
+            **kwargs,
     ) -> "Pipe[R]":
         """
         Returns a new pipe containing the result of calling
@@ -62,7 +62,7 @@ class Pipe(Generic[T, R]):
             return Pipe._from_err(e)
 
     def __or__(self, other: _Args) -> "Pipe[R]":
-        if isinstance(other, Args):
+        if isinstance(other, Then):
             return self.then(other.func, *other.args, **other.kwargs)
         if isinstance(other, Callable):
             return self.then(other)
