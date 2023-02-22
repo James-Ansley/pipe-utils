@@ -1,4 +1,4 @@
-﻿pipe\_utils.iterables
+pipe\_utils.iterables
 =====================
 
 .. automodule:: pipe_utils.iterables

@@ -1,4 +1,4 @@
-﻿pipe\_utils.pipe
+pipe\_utils.pipe
 ================
 
 .. automodule:: pipe_utils.pipe

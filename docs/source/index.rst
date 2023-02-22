@@ -18,19 +18,19 @@ Example
 
     from pipe_utils import Pipe
     from pipe_utils.iterables import *
+    from pipe_utils.mappings import *
 
     words = "I just think pipes are neat"
 
-    data = (
+    result = (
             Pipe(words)
             | str.lower
             | str.split
-            | sorted_by(len)
             | group_by(len)
-            | dict
+            | sorted_dict
     ).get()
 
-    print(data)
+    print(result)
     #  {1: ['i'], 3: ['are'], 4: ['just', 'neat'], 5: ['think', 'pipes']}
 
 Install

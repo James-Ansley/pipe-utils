@@ -1,4 +1,4 @@
-﻿pipe\_utils.mappings
+pipe\_utils.mappings
 ====================
 
 .. automodule:: pipe_utils.mappings
@@ -15,6 +15,8 @@
    
       item_view
       key_view
+      map_keys
+      map_values
       sorted_by_key
       sorted_by_key_by
       sorted_by_value
