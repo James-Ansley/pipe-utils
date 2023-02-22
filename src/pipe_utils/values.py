@@ -4,14 +4,9 @@ Contains several utility functions to support processing single values
 
 import operator
 from collections.abc import Callable
-from typing import Any, Protocol, TypeVar
+from typing import Any, Protocol
 
-T = TypeVar("T")
-V = TypeVar("V")
-R = TypeVar("R")
-Predicate = Callable[[T], bool]
-
-nothing = object()
+from ._types import *
 
 __all__ = [
     "not_",
@@ -50,12 +45,12 @@ __all__ = [
 
 class SupportsLE(Protocol[T, V]):
     def __le__(self: T, other: V) -> bool:
-        ...
+        """self <= other"""
 
 
 class SupportsGE(Protocol[T, V]):
     def __ge__(self: T, other: V) -> bool:
-        ...
+        """self >= other"""
 
 
 def not_(func: Predicate) -> Predicate:

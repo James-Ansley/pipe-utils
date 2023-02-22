@@ -1,3 +1,4 @@
+import operator
 from io import StringIO
 
 from pytest import raises
@@ -29,10 +30,17 @@ def test_pipe_or():
     assert (Pipe("Hello") | len).get() == 5
     assert (Pipe(5) | str).get() == "5"
     assert (Pipe([3, 2, 1]) | sorted).get() == [1, 2, 3]
-    assert (Pipe("Hello")
-            | list
-            | (lambda data: map(lambda c: c * 2, data))
-            | "".join).get() == "HHeelllloo"
+    assert (
+                   Pipe("Hello")
+                   | list
+                   | (lambda data: map(lambda c: c * 2, data))
+                   | "".join
+           ).get() == "HHeelllloo"
+    assert (
+                   Pipe(1)
+                   | (operator.add, 5)
+                   | (operator.mul, 2)
+           ).get() == 12
 
 
 def test_err_is_caught():
@@ -73,3 +81,17 @@ def test_catch():
             .then(list)
             .catch(TypeError, lambda _: [0])
         ).get()
+
+
+def test_pipe_err_state_is_chained():
+    assert (
+        Pipe(1)
+        | (operator.truediv, 0)
+        | (operator.add, 1)
+        | Then(print, end="")
+    ).get_or_default("Oops!") == "Oops!"
+
+
+def test_pipe_with_non_function():
+    with raises(ValueError):
+        Pipe([]) | 4

@@ -134,6 +134,19 @@ def test_mod_by():
     assert mod_by(5)(6) == 1
 
 
+def test_matmul_by():
+    class X:
+        def __init__(self, data):
+            self.data = data
+
+        def __matmul__(self, other):
+            return self.data + other
+
+    assert matmul_by(2)((X(0))) == 2
+    assert matmul_by(2)((X(1))) == 3
+    assert matmul_by(-1)((X(1))) == 0
+
+
 def test_to_power():
     assert to_power(2)(2) == 4
     assert to_power(0)(2) == 1

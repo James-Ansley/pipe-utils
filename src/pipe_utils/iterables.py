@@ -5,34 +5,10 @@ Contains several utility functions to support processing iterables
 import functools
 import itertools
 from collections import defaultdict, deque
-from collections.abc import Callable, Hashable, Iterable, Mapping, Sequence
-from typing import Type, TypeVar, overload
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from typing import overload
 
-T = TypeVar("T")
-V = TypeVar("V")
-K = TypeVar("K")
-H = TypeVar("H", bound=Hashable)
-
-E = TypeVar("E", bound=BaseException)
-EType = Type[E] | tuple[Type[E], ...]
-
-Nested = Iterable[Iterable[T]]
-Map = Callable[[T], V]
-
-Iter = Callable[[Iterable[T]], Iterable[T]]
-NestedIter = Callable[[Iterable[T]], Nested]
-IterMap = Callable[[Iterable[T]], Iterable[V]]
-
-Predicate = Callable[[T], bool]
-BoolReducer = Callable[[Iterable[T]], bool]
-
-IntReducer = Callable[[Iterable[T]], int]
-StrReducer = Callable[[Iterable[T]], str]
-
-Reducer = Callable[[Iterable[T]], T]
-OptionalReducer = Callable[[Iterable[T]], T | None]
-
-Consumer = Callable[[Iterable[T]], None]
+from ._types import *
 
 __all__ = [
     "all_",
@@ -125,7 +101,7 @@ def associate(
     return lambda data: dict(func(e) for e in data)
 
 
-def associate_with(func: Map) -> Callable[[Iterable[T]], Mapping[T, V]]:
+def associate_with(func: Function) -> Callable[[Iterable[T]], Mapping[T, V]]:
     """
     Returns a callable that returns a mapping of key value pairs produced from
     func(t) -> v
@@ -135,7 +111,7 @@ def associate_with(func: Map) -> Callable[[Iterable[T]], Mapping[T, V]]:
     return lambda data: {k: func(k) for k in data}
 
 
-def chunked(n: int) -> NestedIter:
+def chunked(n: int) -> NestedIterCurry:
     """Returns a callable that yields items split into chunks of size n"""
     if n <= 0:
         raise ValueError("Cannot yield non-positive chunk sizes")
@@ -148,12 +124,12 @@ def chunked(n: int) -> NestedIter:
     return _func
 
 
-def concat(other: Iterable[T]) -> Iter:
+def concat(other: Iterable[T]) -> IterCurry:
     """Returns a callable that yield [*data, *other]"""
     return lambda data: itertools.chain(data, other)
 
 
-def concat_after(other: Iterable[T]) -> Iter:
+def concat_after(other: Iterable[T]) -> IterCurry:
     """Returns a callable that yield [*other, *data]"""
     return lambda data: itertools.chain(other, data)
 
@@ -189,7 +165,7 @@ def distinct(data: Iterable[H]) -> Iterable[H]:
     return dict.fromkeys(data).keys()
 
 
-def distinct_by(func: Callable[[T], K]) -> Iter:
+def distinct_by(func: Callable[[T], K]) -> IterCurry:
     """
     Returns a callable that returns items from a given iterable with distinct
     keys. Keys must be hashable.
@@ -207,7 +183,7 @@ def distinct_by(func: Callable[[T], K]) -> Iter:
     return _func
 
 
-def drop(n: int) -> Iter:
+def drop(n: int) -> IterCurry:
     """
     Returns a callable that drops n items from a given iterable
 
@@ -224,7 +200,7 @@ def drop(n: int) -> Iter:
     return _func
 
 
-def drop_last(n: int) -> Iter:
+def drop_last(n: int) -> IterCurry:
     """
     Returns a callable that drops the last n items from a given iterable
 
@@ -246,7 +222,7 @@ def drop_last(n: int) -> Iter:
     return _func
 
 
-def drop_last_while(func: Predicate) -> Iter:
+def drop_last_while(func: Predicate) -> IterCurry:
     """
     Returns a callable that drops the items of an iterable except the last
     items that satisfy the predicate
@@ -266,7 +242,7 @@ def drop_last_while(func: Predicate) -> Iter:
     return _func
 
 
-def drop_while(func: Predicate) -> Iter:
+def drop_while(func: Predicate) -> IterCurry:
     """
     Returns a callable that drops the items of an iterable except the first
     items that satisfy the predicate
@@ -274,7 +250,7 @@ def drop_while(func: Predicate) -> Iter:
     return lambda data: itertools.dropwhile(func, data)
 
 
-def filter_(func: Predicate) -> Iter:
+def filter_(func: Predicate) -> IterCurry:
     """
     Returns a callable that returns an iterator yielding those items of
     the iterable for which func(item) is true.
@@ -282,7 +258,7 @@ def filter_(func: Predicate) -> Iter:
     return lambda data: filter(func, data)
 
 
-def filter_false(func: Predicate) -> Iter:
+def filter_false(func: Predicate) -> IterCurry:
     """
     Returns a callable that returns an iterator yielding those items of
     the iterable for which func(item) is false.
@@ -316,7 +292,7 @@ def find_last(func: Predicate) -> OptionalReducer:
     return _func
 
 
-def first(n: int = 1) -> Iter:
+def first(n: int = 1) -> IterCurry:
     """
     Returns a callable that returns the first n items from an iterable.
     n is the min of the size of the iterable or the given value.
@@ -336,7 +312,7 @@ def flatten(data: Iterable[Iterable[T]]) -> Iterable[T]:
     return itertools.chain.from_iterable(data)
 
 
-def flat_map(func: Callable[[T], Iterable[V]]) -> IterMap:
+def flat_map(func: Callable[[T], Iterable[V]]) -> IterMapCurry:
     """
     Returns a callable that returns a single iterable containing all the
     items from the result of func in sequence
@@ -420,12 +396,12 @@ def get_or_default(i: int, default: T) -> Reducer:
 
 def is_empty(data: Iterable) -> bool:
     """Returns True if the given iterable is empty and False otherwise"""
-    return len(tuple(data)) == 0
+    return next(iter(data), nothing) is nothing
 
 
 def is_not_empty(data: Iterable) -> bool:
     """Returns True if the given iterable is not empty and False otherwise"""
-    return len(tuple(data)) != 0
+    return next(iter(data), nothing) is not nothing
 
 
 def index_of(value: T) -> IntReducer:
@@ -478,7 +454,7 @@ def join_to_str(
     )
 
 
-def last(n: int = 1) -> Iter:
+def last(n: int = 1) -> IterCurry:
     """
     Returns a callable that returns the last n items from an iterable.
     n is the min of the size of the iterable or the given value.
@@ -498,7 +474,7 @@ def last(n: int = 1) -> Iter:
     return _func
 
 
-def map_(func: Map) -> IterMap:
+def map_(func: Function) -> IterMapCurry:
     """
     Returns a callable that returns an iterator yielding those items of
     the iterable mapped with the function func(item)
@@ -506,7 +482,7 @@ def map_(func: Map) -> IterMap:
     return lambda data: map(func, data)
 
 
-def max_by(func: Map) -> Reducer:
+def max_by(func: Function) -> Reducer:
     """
     Returns a callable that returns the item with the max value using the key
     function
@@ -514,7 +490,7 @@ def max_by(func: Map) -> Reducer:
     return lambda data: max(data, key=func)
 
 
-def min_by(func: Map) -> Reducer:
+def min_by(func: Function) -> Reducer:
     """
     Returns a callable that returns the item with the min value using the key
     function
@@ -546,7 +522,7 @@ def partition(
     return _func
 
 
-def peek(func: Callable[[T], None]) -> Iter:
+def peek(func: Callable[[T], None]) -> IterCurry:
     """
     Returns a callable that lazily applies the given function to each item in
     an iterable and yields the unmodified item. This is intended as a utility
@@ -566,7 +542,7 @@ def reduce(func: Callable[[T, T], T]) -> Reducer:
     return lambda data: functools.reduce(func, data)
 
 
-def remove(value: T) -> Iter:
+def remove(value: T) -> IterCurry:
     """
     Returns a callable that returns all the values from a given iterable
     except the first occurrence of the given value
@@ -580,7 +556,7 @@ def remove(value: T) -> Iter:
     return _func
 
 
-def remove_last(value: T) -> Iter:
+def remove_last(value: T) -> IterCurry:
     """
     Returns a callable that returns all the values from a given iterable
     except the last occurrence of the given value
@@ -604,18 +580,18 @@ def remove_last(value: T) -> Iter:
     return _func
 
 
-def scan(func: Callable[[T, T], T], initial=None) -> Iter:
+def scan(func: Callable[[T, T], T], initial=None) -> IterCurry:
     """Returns a callable that yields accumulated values"""
     return lambda data: itertools.accumulate(data, func, initial=initial)
 
 
 @overload
-def slice_(stop: int) -> Iter:
+def slice_(stop: int) -> IterCurry:
     """Returns a callable returns items up to the index before the stop value"""
 
 
 @overload
-def slice_(start: int, stop: int) -> Iter:
+def slice_(start: int, stop: int) -> IterCurry:
     """
     Returns a callable returns items from the given start index to the
     index before the stop value
@@ -623,7 +599,7 @@ def slice_(start: int, stop: int) -> Iter:
 
 
 @overload
-def slice_(start: int, stop: int, step: int) -> Iter:
+def slice_(start: int, stop: int, step: int) -> IterCurry:
     """
     Returns a callable that returns items from the given start index to one
     before the given stop index with the given step size
@@ -631,10 +607,11 @@ def slice_(start: int, stop: int, step: int) -> Iter:
 
 
 def slice_(*args):
+    """Slices iterable with [start,] stop, [step=1] args"""
     return lambda data: itertools.islice(data, *args)
 
 
-def sorted_by(func: Map) -> Iter:
+def sorted_by(func: Function) -> IterCurry:
     """Returns a callable that sorts an iterable by the given key function"""
     return lambda data: sorted(data, key=func)
 
@@ -644,7 +621,7 @@ def sorted_desc(data: Iterable[T]) -> Iterable[T]:
     return sorted(data, reverse=True)
 
 
-def sorted_desc_by(func: Map) -> Iter:
+def sorted_desc_by(func: Function) -> IterCurry:
     """
     Returns a callable that sorts an iterable in reverse order by the given
     key function
@@ -652,7 +629,7 @@ def sorted_desc_by(func: Map) -> Iter:
     return lambda data: sorted(data, key=func, reverse=True)
 
 
-def split_by(*separators: T) -> NestedIter:
+def split_by(*separators: T) -> NestedIterCurry:
     def _func(data):
         next_ = deque()
         for e in data:
@@ -666,12 +643,12 @@ def split_by(*separators: T) -> NestedIter:
     return _func
 
 
-def starmap(func: Callable[[...], T]) -> Iter:
+def starmap(func: Callable[[...], T]) -> IterCurry:
     """Returns a callable that returns the mapped starred values"""
     return lambda data: itertools.starmap(func, data)
 
 
-def starred(func: Callable[[...], V], **kwargs) -> IterMap:
+def starred(func: Callable[[...], V], **kwargs) -> IterMapCurry:
     """
     Returns a callable that takes in data and calls func with the data starred.
     Kwargs are passed to the function.
@@ -679,7 +656,7 @@ def starred(func: Callable[[...], V], **kwargs) -> IterMap:
     return lambda data: func(*data, **kwargs)
 
 
-def take(n: int = 1) -> Iter:
+def take(n: int = 1) -> IterCurry:
     """
     Returns a callable that returns the first n items form a given iterable
 
@@ -691,7 +668,7 @@ def take(n: int = 1) -> Iter:
     return lambda data: itertools.islice(data, n)
 
 
-def take_last(n: int = 1) -> Iter:
+def take_last(n: int = 1) -> IterCurry:
     """
     Returns a callable that returns the last n items form a given iterable
 
@@ -703,7 +680,7 @@ def take_last(n: int = 1) -> Iter:
     return lambda data: iter(deque(data, maxlen=n))
 
 
-def take_last_while(func: Predicate) -> Iter:
+def take_last_while(func: Predicate) -> IterCurry:
     """
     Returns a callable that returns the last elements from an iterable that
     satisfy the given predicate
@@ -722,7 +699,7 @@ def take_last_while(func: Predicate) -> Iter:
     return _func
 
 
-def take_while(func: Predicate) -> Iter:
+def take_while(func: Predicate) -> IterCurry:
     """
     Returns a callable that returns the first elements from an iterable that
     satisfy the given predicate
@@ -730,18 +707,18 @@ def take_while(func: Predicate) -> Iter:
     return lambda data: itertools.takewhile(func, data)
 
 
-def transpose(data: Nested) -> Nested:
+def transpose(data: NestedIter) -> NestedIter:
     """Returns the data transposed. e.g. [[1, 2], [3, 4]] -> [[1, 3], [2, 4]]"""
     return zip(*data)
 
 
 def try_map(
-        func: Map,
-        err: Type[E] | tuple[Type[E], ...] = Exception,
+        func: Function,
+        err: EType = Exception,
         default: V = None,
         *,
         ignore_errors: bool = False
-) -> IterMap:
+) -> IterMapCurry:
     """
     Returns a callable that attempts to map each item in an iterable.
 
@@ -763,7 +740,7 @@ def try_map(
     return _func
 
 
-def windowed(n: int) -> NestedIter:
+def windowed(n: int) -> NestedIterCurry:
     """
     Returns a callable that returns a sliding window of size n over an iterable.
     Raises a ValueError if the window size is bigger than the given iterable
