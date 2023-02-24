@@ -76,6 +76,30 @@ def test_is_non_positive():
     assert not is_non_positive(Fraction(1, 1))
 
 
+def test_clamp():
+    assert clamp(0, 10)(5) == 5
+    assert clamp(0, 10)(20) == 10
+    assert clamp(0, 10)(-20) == 0
+    assert clamp(0, 10)(0) == 0
+    assert clamp(0, 10)(10) == 10
+
+
+def test_lclamp():
+    assert lclamp(0)(5) == 5
+    assert lclamp(20)(10) == 20
+    assert lclamp(0)(-20) == 0
+    assert lclamp(0)(0) == 0
+    assert lclamp(10)(10) == 10
+
+
+def test_rclamp():
+    assert rclamp(10)(5) == 5
+    assert rclamp(10)(20) == 10
+    assert rclamp(0)(20) == 0
+    assert rclamp(0)(0) == 0
+    assert rclamp(10)(10) == 10
+
+
 def test_is_none():
     assert is_none(None)
     assert not is_none([])

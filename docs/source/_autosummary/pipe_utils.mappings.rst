@@ -1,4 +1,4 @@
-pipe\_utils.mappings
+﻿pipe\_utils.mappings
 ====================
 
 .. automodule:: pipe_utils.mappings
@@ -13,6 +13,10 @@ pipe\_utils.mappings
 
    .. autosummary::
    
+      filter_keys
+      filter_values
+      get_value
+      get_value_or_default
       item_view
       key_view
       map_keys

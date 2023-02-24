@@ -1,4 +1,4 @@
-pipe\_utils.values
+﻿pipe\_utils.values
 ==================
 
 .. automodule:: pipe_utils.values
@@ -18,6 +18,7 @@ pipe\_utils.values
       bit_and
       bit_or
       bit_xor
+      clamp
       div_by
       eq
       fdiv_by
@@ -32,6 +33,7 @@ pipe\_utils.values
       is_odd
       it_is
       it_is_not
+      lclamp
       le
       lshift
       lt
@@ -41,6 +43,7 @@ pipe\_utils.values
       ne
       not_
       or_
+      rclamp
       rshift
       sub_by
       to_power

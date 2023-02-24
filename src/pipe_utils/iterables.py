@@ -66,6 +66,7 @@ __all__ = [
     "take_last",
     "take_last_while",
     "take_while",
+    "to_each",
     "transpose",
     "try_map",
     "windowed",
@@ -331,7 +332,7 @@ def fold(initial: T, func: Callable[[T, T], T]) -> Reducer:
 
 def for_each(func: Callable[[T], None]) -> Consumer:
     """
-    Returns a callable that greedily applies func to each item in a given
+    Returns a callable that eagerly applies func to each item in a given
     iterable
     """
 
@@ -360,15 +361,15 @@ def group_by(
 
 def get(i: int) -> Reducer:
     """
-    Returns a callable that retrieves the ith element of a given iterable.
-    i must be non-negative
+    Returns a callable that retrieves the ith element of a given iterable. i
+    must be non-negative.
 
-    :raises IndexError: if i is not 0 <= i < len(iterable)
+    :raises IndexError: if i is not in range(len(data))
     """
-    if i < 0:
-        raise IndexError("Cannot use negative indices on Iterable")
 
     def _func(data):
+        if i < 0:
+            raise IndexError(f"Iterable indices cannot be negative")
         try:
             return next(itertools.islice(data, i, i + 1))
         except StopIteration:
@@ -377,7 +378,7 @@ def get(i: int) -> Reducer:
     return _func
 
 
-def get_or_default(i: int, default: T) -> Reducer:
+def get_or_default(i: int, default: V) -> Callable[[Iterable[T]], T | V]:
     """
     Returns a callable that retrieves the ith element of a given iterable or
     the default value if i is outside the range of 0 <= i < len(iterable).
@@ -630,6 +631,13 @@ def sorted_desc_by(func: Function) -> IterCurry:
 
 
 def split_by(*separators: T) -> NestedIterCurry:
+    """
+    Returns a callable that splits an iterable by one or more separator values.
+
+    e.g. ignoring types: :code:`split_by(-1, 0)([1, 2, 0, -1, 3, 4, -1])`
+    is equivalent to :code:`[[1, 2], [], [3, 4], []]`
+    """
+
     def _func(data):
         next_ = deque()
         for e in data:
@@ -705,6 +713,21 @@ def take_while(func: Predicate) -> IterCurry:
     satisfy the given predicate
     """
     return lambda data: itertools.takewhile(func, data)
+
+
+def to_each(func: Action) -> IterCurry:
+    """
+    Returns a callable that eagerly applies the given function to each item
+    an iterable and returns the iterable.
+    """
+
+    def _func(data):
+        thing1, thing2 = itertools.tee(data, 2)
+        for thing in thing1:
+            func(thing)
+        return thing2
+
+    return _func
 
 
 def transpose(data: NestedIter) -> NestedIter:

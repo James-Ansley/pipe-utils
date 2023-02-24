@@ -513,6 +513,15 @@ def test_take_while():
     assert (Pipe([2, 1, 4, 6]) | take_while(is_even) | list).get() == [2]
 
 
+def test_to_each():
+    values = to_each(lambda it: it.append(1))(iter([[], [], []]))
+    assert list(values) == [[1], [1], [1]]
+    values = to_each(lambda it: it.clear())(iter([[1], [2], [3]]))
+    assert list(values) == [[], [], []]
+    values = to_each(lambda it: it[0])(iter([[1], [2], [3]]))
+    assert list(values) == [[1], [2], [3]]
+
+
 def test_transpose():
     assert (Pipe(range(6)) | chunked(2) | transpose | map_(tuple) | tuple
             ).get() == ((0, 2, 4), (1, 3, 5))

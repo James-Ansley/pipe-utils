@@ -9,6 +9,10 @@ from typing import Any, KeysView, ValuesView
 from pipe_utils._types import *
 
 __all__ = [
+    "filter_keys",
+    "filter_values",
+    "get_value",
+    "get_value_or_default",
     "item_view",
     "key_view",
     "map_keys",
@@ -21,6 +25,27 @@ __all__ = [
     "sorted_dict_by",
     "value_view",
 ]
+
+
+def filter_keys(func: Callable[[K], bool]) -> DictCurry:
+    """Returns a callable that filters a mapping by keys"""
+    return lambda data: {k: v for k, v in data.items() if func(k)}
+
+
+def filter_values(func: Callable[[V], bool]) -> DictCurry:
+    """Returns a callable that filters a mapping by values"""
+    return lambda data: {k: v for k, v in data.items() if func(v)}
+
+
+def get_value(key: K) -> DictCurry:
+    """Returns a callable that gets the value associated with the given key."""
+    return lambda data: data[key]
+
+
+def get_value_or_default(
+        key: K, default: T) -> Callable[[Mapping[K, V]], Mapping[K, V | T]]:
+    """Returns a callable that gets the value associated with the given key."""
+    return lambda data: data.get(key, default)
 
 
 def item_view(data: Mapping[K, V]) -> ItemsView[K, V]:

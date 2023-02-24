@@ -50,6 +50,5 @@ autodoc_default_options = {
     "python_use_unqualified_type_names": True,
 }
 autodoc_member_order = "bysource"
-autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 python_use_unqualified_type_names = True

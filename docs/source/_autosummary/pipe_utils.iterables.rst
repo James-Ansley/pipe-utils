@@ -1,4 +1,4 @@
-pipe\_utils.iterables
+﻿pipe\_utils.iterables
 =====================
 
 .. automodule:: pipe_utils.iterables
@@ -68,6 +68,7 @@ pipe\_utils.iterables
       take_last
       take_last_while
       take_while
+      to_each
       transpose
       try_map
       unzip

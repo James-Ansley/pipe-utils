@@ -1,4 +1,4 @@
-from collections.abc import Callable, Hashable, Iterable
+from collections.abc import Callable, Hashable, Iterable, Mapping
 from typing import Type, TypeVar
 
 __all__ = [
@@ -29,6 +29,7 @@ __all__ = [
     "Consumer",
 
     # FuncUtils
+    "Action",
     "Function",
     "Predicate",
 ]
@@ -48,7 +49,7 @@ NestedIter = Iterable[Iterable[T]]
 IterCurry = Callable[[Iterable[T]], Iterable[T]]
 NestedIterCurry = Callable[[Iterable[T]], NestedIter]
 IterMapCurry = Callable[[Iterable[T]], Iterable[V]]
-DictCurry = Callable[[dict[K, V]], dict[K, V]]
+DictCurry = Callable[[Mapping[K, V]], dict[K, V]]
 
 Reducer = Callable[[Iterable[T]], T]
 OptionalReducer = Callable[[Iterable[T]], T | None]
@@ -57,5 +58,6 @@ IntReducer = Callable[[Iterable[T]], int]
 StrReducer = Callable[[Iterable[T]], str]
 Consumer = Callable[[Iterable[T]], None]
 
+Action = Callable[[T], None]
 Function = Callable[[T], V]
 Predicate = Callable[[T], bool]

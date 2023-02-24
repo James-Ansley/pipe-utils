@@ -5,8 +5,10 @@ Contains all the utility functions.
 """
 
 # noinspection PyUnresolvedReferences
-from pipe_utils.iterables import *
+from .pipe import *
 # noinspection PyUnresolvedReferences
-from pipe_utils.mappings import *
+from .iterables import *
 # noinspection PyUnresolvedReferences
-from pipe_utils.values import *
+from .mappings import *
+# noinspection PyUnresolvedReferences
+from .values import *

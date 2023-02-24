@@ -17,6 +17,9 @@ __all__ = [
     "is_congruent",
     "is_non_negative",
     "is_non_positive",
+    "clamp",
+    "lclamp",
+    "rclamp",
     "is_none",
     "is_not_none",
     "add_by",
@@ -95,6 +98,30 @@ def is_non_negative(item: SupportsGE) -> bool:
 def is_non_positive(item: SupportsLE) -> bool:
     """Returns True if the given item is less than or equal to 0"""
     return item <= 0
+
+
+def clamp(lower: T, upper: T) -> Callable[[T], T]:
+    """
+    Returns a callable that clamps a value between lower and upper.
+    Equivalent to :code:`max(lower, min(item, upper))`
+    """
+    return lambda item: max(lower, min(item, upper))
+
+
+def lclamp(lower: T) -> Callable[[T], T]:
+    """
+    Returns a callable that left clamps a value with a lower bound.
+    Equivalent to :code:`max(lower, item)`
+    """
+    return lambda item: max(lower, item)
+
+
+def rclamp(upper: T) -> Callable[[T], T]:
+    """
+    Returns a callable that right clamps a value with an upper bound.
+    Equivalent to :code:`min(item, upper)`
+    """
+    return lambda item: min(item, upper)
 
 
 def is_none(item: Any) -> bool:
