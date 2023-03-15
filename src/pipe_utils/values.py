@@ -2,6 +2,8 @@
 Contains several utility functions to support processing single values
 """
 
+from deprecated.sphinx import deprecated
+
 import operator
 from collections.abc import Callable
 from typing import Any, Protocol
@@ -90,11 +92,13 @@ def is_congruent(a: int, n: int) -> Callable[[int], bool]:
     return lambda item: (item - a) % n == 0
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def is_non_negative(item: SupportsGE) -> bool:
     """Returns True if the given item is greater than or equal to 0"""
     return item >= 0
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def is_non_positive(item: SupportsLE) -> bool:
     """Returns True if the given item is less than or equal to 0"""
     return item <= 0
@@ -134,71 +138,85 @@ def is_not_none(item: Any) -> bool:
     return item is not None
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def add_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x + n"""
     return lambda item: operator.add(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def sub_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x - n"""
     return lambda item: operator.sub(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def mul_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x * n"""
     return lambda item: operator.mul(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def div_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x / n"""
     return lambda item: operator.truediv(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def fdiv_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x // n"""
     return lambda item: operator.floordiv(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def mod_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x % n"""
     return lambda item: operator.mod(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def matmul_by(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x @ n"""
     return lambda item: operator.matmul(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def to_power(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x ** n"""
     return lambda item: operator.pow(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def eq(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x == n"""
     return lambda item: operator.eq(item, other)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def ne(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x != n"""
     return lambda item: operator.ne(item, other)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def lt(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x < n"""
     return lambda item: operator.lt(item, other)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def le(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x <= n"""
     return lambda item: operator.le(item, other)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def gt(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x > n"""
     return lambda item: operator.gt(item, other)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def ge(other: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x >= n"""
     return lambda item: operator.ge(item, other)
@@ -214,26 +232,31 @@ def it_is_not(obj: Any) -> Callable:
     return lambda item: operator.is_not(item, obj)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def bit_and(value: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x & value"""
     return lambda item: operator.and_(item, value)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def bit_or(value: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x | value"""
     return lambda item: operator.or_(item, value)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def bit_xor(value: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x ^ value"""
     return lambda item: operator.xor(item, value)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def rshift(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x >> n"""
     return lambda item: operator.rshift(item, n)
 
 
+@deprecated(version="0.2.0", reason="Use :const:`pipe_utils.pipe.it` instead")
 def lshift(n: Any) -> Callable:
     """Returns a callable that takes a parameter x and returns x << n"""
     return lambda item: operator.lshift(item, n)

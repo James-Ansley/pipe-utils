@@ -1,7 +1,8 @@
 from collections.abc import Callable, Iterable
+from operator import attrgetter
 from typing import Generic, Type, TypeVar
 
-__all__ = ["Then", "Pipe"]
+__all__ = ["Then", "Pipe", "it"]
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -20,6 +21,7 @@ class Then:
     Is evaluated as func(data, *args, **kwargs) where the data is the value
     currently stored in the pipe
     """
+
     def __init__(self, func, *args, **kwargs):
         self.func = func
         self.args = args
@@ -109,3 +111,155 @@ class Pipe(Generic[T, R]):
         if self._err is not None:
             raise exception from self._err
         return self._data
+
+
+class It:
+    def __init__(self, call=None):
+        if call is None:
+            call = lambda e, *args, **kwargs: e
+        self._callable = call
+
+    def __call__(self, value, *args, **kwargs):
+        return self._callable(value, *args, **kwargs)
+
+    def __lt__(self, other):
+        return It(lambda e: self._callable(e) < other)
+
+    def __le__(self, other):
+        return It(lambda e: self._callable(e) <= other)
+
+    def __eq__(self, other):
+        return It(lambda e: self._callable(e) == other)
+
+    def __ne__(self, other):
+        return It(lambda e: self._callable(e) != other)
+
+    def __ge__(self, other):
+        return It(lambda e: self._callable(e) >= other)
+
+    def __gt__(self, other):
+        return It(lambda e: self._callable(e) > other)
+
+    def __abs__(self, ):
+        return It(lambda e: self._callable(e).__abs__())
+
+    def __pos__(self, ):
+        return It(lambda e: +self._callable(e))
+
+    def __neg__(self):
+        return It(lambda e: -self._callable(e))
+
+    def __add__(self, other):
+        return It(lambda e: self._callable(e) + other)
+
+    def __floordiv__(self, other):
+        return It(lambda e: self._callable(e) // other)
+
+    def __matmul__(self, other):
+        return It(lambda e: self._callable(e) @ other)
+
+    def __mod__(self, other):
+        return It(lambda e: self._callable(e) % other)
+
+    def __mul__(self, other):
+        return It(lambda e: self._callable(e) * other)
+
+    def __pow__(self, other, modulo=None):
+        return It(lambda e: pow(self._callable(e), other, modulo))
+
+    def __sub__(self, other):
+        return It(lambda e: self._callable(e) - other)
+
+    def __truediv__(self, other):
+        return It(lambda e: self._callable(e) / other)
+
+    def __or__(self, other):
+        return It(lambda e: self._callable(e) | other)
+
+    def __and__(self, other):
+        return It(lambda e: self._callable(e) & other)
+
+    def __invert__(self):
+        return It(lambda e: ~self._callable(e))
+
+    def __lshift__(self, other):
+        return It(lambda e: self._callable(e) << other)
+
+    def __rshift__(self, other):
+        return It(lambda e: self._callable(e) >> other)
+
+    def __xor__(self, other):
+        return It(lambda e: self._callable(e) ^ other)
+
+    def __getitem__(self, item):
+        return It(lambda e: self._callable(e)[item])
+
+    def __radd__(self, other):
+        return It(lambda e: other + self._callable(e))
+
+    def __rsub__(self, other):
+        return It(lambda e: other - self._callable(e))
+
+    def __rmul__(self, other):
+        return It(lambda e: other * self._callable(e))
+
+    def __rmatmul__(self, other):
+        return It(lambda e: other @ self._callable(e))
+
+    def __rtruediv__(self, other):
+        return It(lambda e: other / self._callable(e))
+
+    def __rfloordiv__(self, other):
+        return It(lambda e: other // self._callable(e))
+
+    def __rmod__(self, other):
+        return It(lambda e: other % self._callable(e))
+
+    def __divmod__(self, other):
+        return It(lambda e: self._callable(e).__divmod__(other))
+
+    def __rdivmod__(self, other):
+        return It(lambda e: divmod(other, e))
+
+    def __rpow__(self, other, modulo=None):
+        return It(lambda e: pow(other, self._callable(e), modulo))
+
+    def __rlshift__(self, other):
+        return It(lambda e: other << self._callable(e))
+
+    def __rrshift__(self, other):
+        return It(lambda e: other >> self._callable(e))
+
+    def __rand__(self, other):
+        return It(lambda e: other & self._callable(e))
+
+    def __rxor__(self, other):
+        return It(lambda e: other ^ self._callable(e))
+
+    def __ror__(self, other):
+        return It(lambda e: other | self._callable(e))
+
+    def __getattr__(self, item):
+        return It(lambda e: attrgetter(item)(self._callable(e)))
+
+
+#: A utility object that allows for comparisons and simple operations on objects
+#:
+#: Using :code:`it` in simple expressions results in a callable that takes a
+#: single parameter that will evaluate the expression by replacing :code:`it`.
+#: For example, callables can be constructed thus::
+#:
+#:     it % 2 == 0
+#:
+#: This is equivalent to::
+#:
+#:     lambda value: value % 2 == 0
+#:
+#: :code:`it` objects can be used for attribute selection (:code:`it.foo`),
+#: simple operators (e.g. :code:`it + 5`, :code:`~(it << 2)`). **EXCEPT**,
+#: boolean operators (:code:`not, or, and, is, is not`) and the contains
+#: operators ( :code:`in, not in`) do **NOT** work with the :code:`it` object.
+#:
+#: Note: only one :code:`it` object can be used per expression. :code:`it * it`
+#: will not work.
+it = It()

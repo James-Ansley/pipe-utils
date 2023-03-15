@@ -49,6 +49,7 @@ __all__ = [
     "max_by",
     "min_by",
     "none",
+    "not_contains",
     "partition",
     "peek",
     "reduce",
@@ -505,6 +506,14 @@ def none(func: Predicate) -> BoolReducer:
     found that satisfies the given predicate
     """
     return lambda data: not any(func(e) for e in data)
+
+
+def not_contains(value: T) -> BoolReducer:
+    """
+    Returns a callable that returns True if the given iterable doe not contain
+    the value
+    """
+    return lambda data: all(e != value for e in data)
 
 
 def partition(

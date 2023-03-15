@@ -344,6 +344,13 @@ def test_none():
     assert (Pipe([-1, 0, 1]) | none(lambda x: x == 0)).get() is False
 
 
+def test_not_contains():
+    assert (Pipe([]) | not_contains(0)).get() is True
+    assert (Pipe([-1, 1]) | not_contains(0)).get() is True
+    assert (Pipe([-1, 0, 1]) | not_contains(0)).get() is False
+    assert (Pipe([-1]) | concat([0]) | not_contains(0)).get() is False
+
+
 def test_partition():
     assert (Pipe([]) | partition(is_even) | map_(list) | list).get() == [[], []]
     pipe = (Pipe([1, 2, 3, 4]) | partition(is_even) | map_(list) | list)

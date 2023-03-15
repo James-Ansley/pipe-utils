@@ -3,22 +3,22 @@ from collections.abc import ItemsView, KeysView, ValuesView
 from pytest import raises
 
 from pipe_utils.mappings import *
-from pipe_utils.utils import fdiv_by, mul_by
-from pipe_utils.values import gt, is_even
+from pipe_utils.values import is_even
+from pipe_utils import it
 
 
 def test_filter_keys():
     assert filter_keys(is_even)({}) == {}
     data = {1: "a", 2: "b", 3: "c", 4: "d"}
     assert filter_keys(is_even)(data) == {2: "b", 4: "d"}
-    assert filter_keys(gt(0))(data) == data
+    assert filter_keys(it > 0)(data) == data
 
 
 def test_filter_values():
     assert filter_values(is_even)({}) == {}
     data = {"a": 1, "b": 2, "c": 3, "d": 4}
     assert filter_values(is_even)(data) == {"b": 2, "d": 4}
-    assert filter_values(gt(0))(data) == data
+    assert filter_values(it > 0)(data) == data
 
 
 def test_get_value():
@@ -53,17 +53,17 @@ def test_key_view():
 
 def test_map_keys():
     data = {1: "a", 2: "b", 3: "c"}
-    assert dict(map_keys(mul_by(2))(data)) == {2: "a", 4: "b", 6: "c"}
+    assert dict(map_keys(it * 2)(data)) == {2: "a", 4: "b", 6: "c"}
     data = {2: "a", 3: "d", 4: "b", 5: "e", 6: "c", 7: "f"}
-    assert dict(map_keys(fdiv_by(2))(data)) == {1: "d", 2: "e", 3: "f"}
+    assert dict(map_keys(it // 2)(data)) == {1: "d", 2: "e", 3: "f"}
 
 
 def test_map_values():
     data = {1: "a", 2: "b", 3: "c"}
-    assert dict(map_values(mul_by(2))(data)) == {1: "aa", 2: "bb", 3: "cc"}
+    assert dict(map_values(it * 2)(data)) == {1: "aa", 2: "bb", 3: "cc"}
     data = {"a": 2, "d": 3, "b": 4, "e": 5}
     expect = {"a": 1, "d": 1, "b": 2, "e": 2}
-    assert dict(map_values(fdiv_by(2))(data)) == expect
+    assert dict(map_values(it // 2)(data)) == expect
 
 
 def test_sorted_by_key():

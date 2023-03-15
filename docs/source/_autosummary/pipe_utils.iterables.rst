@@ -51,6 +51,7 @@
       max_by
       min_by
       none
+      not_contains
       partition
       peek
       reduce

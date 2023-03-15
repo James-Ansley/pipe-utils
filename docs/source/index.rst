@@ -9,6 +9,7 @@ Python but with pipes, utils, and pipe utils
 
    quickstart
    pipe_objects
+   it
    api
 
 Example

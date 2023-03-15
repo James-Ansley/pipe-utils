@@ -1,9 +1,15 @@
-pipe\_utils.pipe
+﻿pipe\_utils.pipe
 ================
 
 .. automodule:: pipe_utils.pipe
 
    
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      it
    
    
 
@@ -17,6 +23,7 @@ pipe\_utils.pipe
 
    .. autosummary::
    
+      It
       Pipe
       Then
    

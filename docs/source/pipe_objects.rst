@@ -40,16 +40,14 @@ Example
 ^^^^^^^
 ::
 
-    from pipe_utils import Pipe
-    from pipe_utils.iterables import map_
-    from pipe_utils.values import add_by
+    from pipe_utils import *
 
     data = (
         Pipe(range(-10, 11))
-        .then(map_(lambda x: 1 / x))
+        .then(map_(1 / it))
         .then(sum)  # consumes map, ZeroDivisionError is raised for 1 / 0
         .catch(ZeroDivisionError, lambda _: float("NaN"))  # default value of NaN
-        .then(add_by(1))
+        .then(it + 1)
     ).get()
 
     print(data)  # NaN
@@ -88,7 +86,7 @@ For example::
 
     print(data)  # 12
 
-In this example, it might be cleaner to use the :func:`~pipe_utils.values.add_by` and :func:`~pipe_utils.values.mul_by` functions that use currying for slightly cleaner code.
+In this example, it might be cleaner to use the :func:`~pipe_utils.pipe.it` object for slightly cleaner code.
 
 If kwargs are needed, a :class:`~pipe_utils.pipes.Then` object can be constructed with any additional args or kwargs.::
 
@@ -113,12 +111,12 @@ There are three ways to get the data from a pipe: :meth:`~pipe_utils.Pipe.get`, 
 :meth:`~pipe_utils.Pipe.get` will attempt to return the result from the pipe object or raise any errors if the pipe is in error state::
 
     from pipe_utils import Pipe
-    from pip_utils.values import div_by, add_by
+    from pipe_utils.values import div_by, add_by
 
     data = (
         Pipe(1)
-        | div_by(0)
-        | add_by(1)
+        | it / 0
+        | it + 1
     ).get()  # Raises ZeroDivisionError
 
 
@@ -126,8 +124,8 @@ There are three ways to get the data from a pipe: :meth:`~pipe_utils.Pipe.get`, 
 
     data = (
         Pipe(1)
-        | div_by(0)
-        | add_by(1)
+        | it / 0
+        | it + 1
     ).get_or_default(float("NaN"))  # nan
 
 
@@ -135,6 +133,6 @@ There are three ways to get the data from a pipe: :meth:`~pipe_utils.Pipe.get`, 
 
     data = (
         Pipe(1)
-        | div_by(0)
-        | add_by(1)
+        | it / 0
+        | it + 1
     ).get_or_raise(ValueError("Oops!"))  # Raises ValueError from the ZeroDivisionError

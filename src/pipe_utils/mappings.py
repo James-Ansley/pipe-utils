@@ -105,7 +105,7 @@ def sorted_dict(data: Mapping[K, V]) -> dict[K, V]:
     return dict(sorted(data.items()))
 
 
-def sorted_dict_by(key: Callable[[tuple[K, V]], Any] = None):
+def sorted_dict_by(key: Callable[[tuple[K, V]], Any]) -> DictCurry:
     """
     Returns a callable that returns a dictionary whose items are in sorted
     order using the given key function.
