@@ -4,7 +4,7 @@ from operator import add
 
 from pytest import raises
 
-from pipe_utils import Pipe
+from pipe_utils import Pipe, it
 from pipe_utils.iterables import *
 
 
@@ -472,6 +472,12 @@ def test_starred():
     stream = StringIO()
     (Pipe([1, 2]) | starred(print, file=stream, sep="~", end="")).get()
     assert stream.getvalue() == "1~2"
+
+
+def test_sum_by():
+    assert sum_by(it * it)([1, 2, 3, 4]) == 30
+    assert sum_by(len)(["1", "22", "ttt"]) == 6
+    assert sum_by(it + it, start=[])([[1], [2, 3]]) == [1, 1, 2, 3, 2, 3]
 
 
 def test_take():

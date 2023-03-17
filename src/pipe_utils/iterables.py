@@ -63,6 +63,7 @@ __all__ = [
     "split_by",
     "starmap",
     "starred",
+    "sum_by",
     "take",
     "take_last",
     "take_last_while",
@@ -127,12 +128,12 @@ def chunked(n: int) -> NestedIterCurry:
 
 
 def concat(other: Iterable[T]) -> IterCurry:
-    """Returns a callable that yield [*data, *other]"""
+    """Returns a callable that yield [\\*data, \\*other]"""
     return lambda data: itertools.chain(data, other)
 
 
 def concat_after(other: Iterable[T]) -> IterCurry:
-    """Returns a callable that yield [*other, *data]"""
+    """Returns a callable that yield [\\*other, \\*data]"""
     return lambda data: itertools.chain(other, data)
 
 
@@ -226,8 +227,8 @@ def drop_last(n: int) -> IterCurry:
 
 def drop_last_while(func: Predicate) -> IterCurry:
     """
-    Returns a callable that drops the items of an iterable except the last
-    items that satisfy the predicate
+    Returns a callable that drops the last items of an iterable that satisfy
+    the predicate
     """
 
     def _func(data):
@@ -246,8 +247,8 @@ def drop_last_while(func: Predicate) -> IterCurry:
 
 def drop_while(func: Predicate) -> IterCurry:
     """
-    Returns a callable that drops the items of an iterable except the first
-    items that satisfy the predicate
+    Returns a callable that drops the items of an iterable while the
+    predicate is True
     """
     return lambda data: itertools.dropwhile(func, data)
 
@@ -671,6 +672,11 @@ def starred(func: Callable[[...], V], **kwargs) -> IterMapCurry:
     Kwargs are passed to the function.
     """
     return lambda data: func(*data, **kwargs)
+
+
+def sum_by(func: Callable[[T], V], start: V = 0) -> Callable[[Iterable[T]], V]:
+    """Returns a callable that sums an iterable by the given function"""
+    return lambda data: sum((func(e) for e in data), start=start)
 
 
 def take(n: int = 1) -> IterCurry:

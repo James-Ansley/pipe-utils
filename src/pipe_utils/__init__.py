@@ -1,5 +1,5 @@
 """
-Base module of pipe-utils. Contains the Pipe class.
+Base module of pipe-utils. Imports everything.
 """
 
 from .pipe import *

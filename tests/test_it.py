@@ -4,26 +4,38 @@ from fractions import Fraction
 from pipe_utils.override import *
 
 
+def test_it():
+    current = it
+    for i in range(2, 5):
+        current += it / i
+    assert current(10) == sum(10 / i for i in range(1, 5))
+    assert current(20) == sum(20 / i for i in range(1, 5))
+
+
 def test_it_lt():
     assert (it < 5)(0)
     assert not (it < 5)(5)
     assert not (it < 5)(10)
+    assert not (it < it)(10)
 
 
 def test_it_le():
     assert (it <= 5)(0)
+    assert (it <= it)(0)
     assert (it <= 5)(5)
     assert not (it <= 5)(6)
 
 
 def test_it_eq():
     assert (it == 5)(5)
+    assert (it == it)(5)
     assert not (it == 5)(0)
     assert not (it == 5)(10)
 
 
 def test_it_ne():
     assert not (it != 5)(5)
+    assert not (it != it)(5)
     assert (it != 5)(0)
     assert (it != 5)(10)
 
@@ -31,6 +43,7 @@ def test_it_ne():
 def test_it_gt():
     assert not (it > 5)(0)
     assert not (it > 5)(5)
+    assert not (it > it)(5)
     assert (it > 5)(10)
 
 
@@ -38,6 +51,7 @@ def test_it_ge():
     assert not (it >= 5)(0)
     assert (it >= 5)(5)
     assert (it >= 5)(6)
+    assert (it >= it)(6)
 
 
 def test_it_abs():
@@ -60,11 +74,13 @@ def test_it_neg():
 def test_it_add():
     assert (it + 5)(0) == 5
     assert (it + 5)(1) == 6
+    assert (it + it)(1) == 2
 
 
 def test_it_floordiv():
     assert (it // 2)(4) == 2.0
     assert (it // 2)(5) == 2.0
+    assert (it // it)(5) == 1.0
 
 
 def test_it_matmul():
@@ -73,11 +89,14 @@ def test_it_matmul():
             self.data = data
 
         def __matmul__(self, other):
+            if isinstance(other, X):
+                other = other.data
             return self.data + other
 
     assert (it @ 2)((X(0))) == 2
     assert (it @ 2)((X(1))) == 3
     assert (it @ -1)((X(1))) == 0
+    assert (it @ it)((X(1))) == 2
 
 
 def test_it_mod():
@@ -86,10 +105,12 @@ def test_it_mod():
     assert (it % 2)(1) == 1
     assert (it % 2)(3) == 1
     assert (it % 5)(6) == 1
+    assert (it % it)(6) == 0
 
 
 def test_it_mul():
     assert (it * 1)(1) == 1
+    assert (it * it)(3) == 9
     assert (it * 1)(-1) == -1
     assert (it * -1)(1) == -1
     assert (it * Fraction(1, 2))(Fraction(1, 2)) == Fraction(1, 4)
@@ -98,6 +119,7 @@ def test_it_mul():
 
 def test_it_pow():
     assert (it ** 2)(2) == 4
+    assert (it ** it)(2) == 4
     assert (it ** 0)(2) == 1
     assert (it ** 1)(0) == 0
     assert (it ** 1)(1) == 1
@@ -106,6 +128,7 @@ def test_it_pow():
 
 def test_it_sub():
     assert (it - 1)(1) == 0
+    assert (it - it)(1) == 0
     assert (it - 1)(-1) == -2
     assert (it - -1)(1) == 2
     assert (it - Fraction(1, 2))(Fraction(1, 2)) == Fraction(0, 1)
@@ -113,6 +136,7 @@ def test_it_sub():
 
 def test_it_div():
     assert (it / 1)(1) == 1.0
+    assert (it / it)(1) == 1.0
     assert (it / 1)(-1) == -1.0
     assert (it / -1)(1) == -1.0
     assert (it / 2)(10) == 5.0
@@ -121,6 +145,7 @@ def test_it_div():
 
 def test_it_or():
     assert (it | 0b0101)(0b1010) == 0b1111
+    assert (it | it)(0b1010) == 0b1010
     assert (it | 0b1010)(0b1010) == 0b1010
     assert (it | 0b00)(0b11) == 0b11
     assert (it | 0b11)(0b11) == 0b11
@@ -128,6 +153,7 @@ def test_it_or():
 
 def test_it_and():
     assert (it & 0b0101)(0b1010) == 0b0000
+    assert (it & it)(0b1010) == 0b1010
     assert (it & 0b1010)(0b1010) == 0b1010
     assert (it & 0b00)(0b11) == 0b00
     assert (it & 0b11)(0b11) == 0b11
@@ -140,18 +166,21 @@ def test_it_invert():
 
 def test_it_lshift():
     assert (it << 1)(2) == 4
+    assert (it << it)(2) == 8
     assert (it << 1)(4) == 8
     assert (it << 2)(8) == 32
 
 
 def test_it_rshift():
     assert (it >> 1)(2) == 1
+    assert (it >> it)(2) == 0
     assert (it >> 1)(4) == 2
     assert (it >> 2)(8) == 2
 
 
 def test_it_xor():
     assert (it ^ 0b0101)(0b1010) == 0b1111
+    assert (it ^ it)(0b1010) == 0
     assert (it ^ 0b1010)(0b1010) == 0b0000
     assert (it ^ 0b00)(0b11) == 0b11
     assert (it ^ 0b11)(0b11) == 0b00
@@ -259,7 +288,9 @@ def test_it_rxor():
 
 def test_it_divmod():
     assert divmod(it, 5)(7) == (1, 2)
+    assert divmod(it, it)(7) == (1, 0)
 
 
 def test_it_rdivmod():
     assert divmod(7, it)(5) == (1, 2)
+    assert divmod(it, it)(5) == (1, 0)

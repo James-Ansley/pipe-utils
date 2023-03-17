@@ -1,7 +1,7 @@
 """
-exposes `Pipe`, `Then`, and all utility functions but aliases `filer_`,
+Imports everything but aliases `filer_`,
 `map_`, `all_`, `any_`, and `slice_` to not include the trailing underscore –
-overriding the builtin names.
+overriding their corresponding builtin names.
 """
 
 # noinspection PyUnresolvedReferences

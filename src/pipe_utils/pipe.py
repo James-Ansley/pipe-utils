@@ -1,3 +1,5 @@
+"""Exports the Pipe, Then, and it objects/classes"""
+
 from collections.abc import Callable, Iterable
 from operator import attrgetter
 from typing import Generic, Type, TypeVar
@@ -16,9 +18,10 @@ _Args = "Callable[[T], R] | Iterable[Callable[[T], R], ...] | Then"
 class Then:
     """
     Container class used to store a func along with additional args and kwargs.
-    Is intended to be used with `Pipe.__or__` (`|`).
+    Is intended to be used with :meth:`Pipe.__or__`
+    (:code:`|`).
 
-    Is evaluated as func(data, *args, **kwargs) where the data is the value
+    Is evaluated as func(data, \\*args, \\*\\*kwargs) where the data is the value
     currently stored in the pipe
     """
 
@@ -32,8 +35,8 @@ class Pipe(Generic[T, R]):
     """
     Pipe class that supports chained operations on the given data. If an
     error occurs during the chaining process, the pipe goes into error
-    state. The error must either be caught by calling `.catch` or ignored
-    when yielding data with `get_or_default` or `get_or_raise`
+    state. The error must either be caught by calling ``.catch`` or ignored
+    when yielding data with ``get_or_default`` or ``get_or_raise``
     """
 
     def __init__(self, data: T):
@@ -54,7 +57,7 @@ class Pipe(Generic[T, R]):
     ) -> "Pipe[R]":
         """
         Returns a new pipe containing the result of calling
-        func(data, *args, **kwargs)
+        func(data, \\*args, \\*\\*kwargs)
         """
         if self._err is not None:
             return self
@@ -123,124 +126,327 @@ class It:
         return self._callable(value, *args, **kwargs)
 
     def __lt__(self, other):
-        return It(lambda e: self._callable(e) < other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    < (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __le__(self, other):
-        return It(lambda e: self._callable(e) <= other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    <= (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __eq__(self, other):
-        return It(lambda e: self._callable(e) == other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    == (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __ne__(self, other):
-        return It(lambda e: self._callable(e) != other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    != (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __ge__(self, other):
-        return It(lambda e: self._callable(e) >= other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    >= (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __gt__(self, other):
-        return It(lambda e: self._callable(e) > other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    > (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __abs__(self, ):
-        return It(lambda e: self._callable(e).__abs__())
+        return It(
+            lambda e: (
+                self._callable(e).__abs__()
+            )
+        )
 
     def __pos__(self, ):
-        return It(lambda e: +self._callable(e))
+        return It(
+            lambda e: (
+                +self._callable(e)
+            )
+        )
 
     def __neg__(self):
-        return It(lambda e: -self._callable(e))
+        return It(
+            lambda e: (
+                -self._callable(e)
+            )
+        )
 
     def __add__(self, other):
-        return It(lambda e: self._callable(e) + other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    + (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __floordiv__(self, other):
-        return It(lambda e: self._callable(e) // other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    // (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __matmul__(self, other):
-        return It(lambda e: self._callable(e) @ other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    @ (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __mod__(self, other):
-        return It(lambda e: self._callable(e) % other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    % (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __mul__(self, other):
-        return It(lambda e: self._callable(e) * other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    * (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __pow__(self, other, modulo=None):
-        return It(lambda e: pow(self._callable(e), other, modulo))
+        return It(
+            lambda e: (
+                pow(
+                    self._callable(e),
+                    (other._callable(e) if isinstance(other, It) else other),
+                    (modulo._callable(e) if isinstance(modulo, It) else modulo),
+                )
+            )
+        )
 
     def __sub__(self, other):
-        return It(lambda e: self._callable(e) - other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    - (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __truediv__(self, other):
-        return It(lambda e: self._callable(e) / other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    / (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __or__(self, other):
-        return It(lambda e: self._callable(e) | other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    | (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __and__(self, other):
-        return It(lambda e: self._callable(e) & other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    & (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __invert__(self):
-        return It(lambda e: ~self._callable(e))
+        return It(
+            lambda e: (
+                ~self._callable(e)
+            )
+        )
 
     def __lshift__(self, other):
-        return It(lambda e: self._callable(e) << other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    << (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __rshift__(self, other):
-        return It(lambda e: self._callable(e) >> other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    >> (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __xor__(self, other):
-        return It(lambda e: self._callable(e) ^ other)
+        return It(
+            lambda e: (
+                    self._callable(e)
+                    ^ (other._callable(e) if isinstance(other, It) else other)
+            )
+        )
 
     def __getitem__(self, item):
-        return It(lambda e: self._callable(e)[item])
+        return It(
+            lambda e: (
+                self._callable(e)[item]
+            )
+        )
 
     def __radd__(self, other):
-        return It(lambda e: other + self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    + self._callable(e)
+            )
+        )
 
     def __rsub__(self, other):
-        return It(lambda e: other - self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    - self._callable(e)
+            )
+        )
 
     def __rmul__(self, other):
-        return It(lambda e: other * self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    * self._callable(e)
+            )
+        )
 
     def __rmatmul__(self, other):
-        return It(lambda e: other @ self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    @ self._callable(e)
+            )
+        )
 
     def __rtruediv__(self, other):
-        return It(lambda e: other / self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    / self._callable(e)
+            )
+        )
 
     def __rfloordiv__(self, other):
-        return It(lambda e: other // self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    // self._callable(e)
+            )
+        )
 
     def __rmod__(self, other):
-        return It(lambda e: other % self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    % self._callable(e)
+            )
+        )
 
     def __divmod__(self, other):
-        return It(lambda e: self._callable(e).__divmod__(other))
+        return It(
+            lambda e: (
+                divmod(
+                    self._callable(e),
+                    (other._callable(e) if isinstance(other, It) else other),
+                )
+            )
+        )
 
     def __rdivmod__(self, other):
-        return It(lambda e: divmod(other, e))
+        return It(
+            lambda e: (
+                divmod(
+                    (other._callable(e) if isinstance(other, It) else other),
+                    self._callable(e),
+                )
+            )
+        )
 
     def __rpow__(self, other, modulo=None):
-        return It(lambda e: pow(other, self._callable(e), modulo))
+        return It(
+            lambda e: (
+                pow(
+                    (other._callable(e) if isinstance(other, It) else other),
+                    self._callable(e),
+                    (modulo._callable(e) if isinstance(modulo, It) else modulo),
+                )
+            )
+        )
 
     def __rlshift__(self, other):
-        return It(lambda e: other << self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    << self._callable(e)
+            )
+        )
 
     def __rrshift__(self, other):
-        return It(lambda e: other >> self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    >> self._callable(e)
+            )
+        )
 
     def __rand__(self, other):
-        return It(lambda e: other & self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    & self._callable(e)
+            )
+        )
 
     def __rxor__(self, other):
-        return It(lambda e: other ^ self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    ^ self._callable(e)
+            )
+        )
 
     def __ror__(self, other):
-        return It(lambda e: other | self._callable(e))
+        return It(
+            lambda e: (
+                    (other._callable(e) if isinstance(other, It) else other)
+                    | self._callable(e)
+            )
+        )
 
     def __getattr__(self, item):
-        return It(lambda e: attrgetter(item)(self._callable(e)))
+        return It(
+            lambda e: (
+                attrgetter(item)(self._callable(e)))
+        )
 
 
 #: A utility object that allows for comparisons and simple operations on objects
@@ -256,10 +462,11 @@ class It:
 #:     lambda value: value % 2 == 0
 #:
 #: :code:`it` objects can be used for attribute selection (:code:`it.foo`),
-#: simple operators (e.g. :code:`it + 5`, :code:`~(it << 2)`). **EXCEPT**,
-#: boolean operators (:code:`not, or, and, is, is not`) and the contains
-#: operators ( :code:`in, not in`) do **NOT** work with the :code:`it` object.
+#: simple operators (e.g. :code:`it + 5`, :code:`~(it << 2)`).
 #:
-#: Note: only one :code:`it` object can be used per expression. :code:`it * it`
-#: will not work.
+#: .. warning::
+#:     Boolean operators (:code:`not, or, and, is, is not, in, not in`)
+#:     do **NOT** work with the :code:`it` object. Instead use their
+#:     corresponding helper functions in :mod:`.values` and
+#:     :mod:`.iterables`
 it = It()

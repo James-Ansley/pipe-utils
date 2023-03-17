@@ -13,11 +13,7 @@ is equivalent to::
 It objects work with attribute selection (:code:`it.foo`), and several operators
 (e.g. :code:`it + 5`, :code:`it > 10`, :code:`~(it >> 2)`).
 
-.. note::
-    :code:`it` objects cannot be used with:
-        - boolean operators :code:`not, or, and, is, is not`
-        - contains operators :code:`in, not in`
+.. warning::
+    Boolean operators (:code:`not, or, and, is, is not, in, not in`) do **NOT** work with the :code:`it` object. Instead use their corresponding helper functions in :mod:`.values` and :mod:`.iterables`
 
-    For these, use their equivalent functions in the `values` module.
-
-    :code:`it` objects cannot be used multiple times in one expression. e.g. :code:`it * it` will not work
+    `it` objects can also only be used to construct callables directly through operators. You cannot pass them into functions etc.

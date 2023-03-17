@@ -65,6 +65,7 @@
       split_by
       starmap
       starred
+      sum_by
       take
       take_last
       take_last_while

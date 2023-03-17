@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1]
+
+### Additions
+
+- `sum_by` function was added to `iterables` module
+
+### Changes
+
+- multiple `it` objects can now be used in a single expression. e.g. `it ** it`
+
 ## [0.2.0]
 
 ### Additions
@@ -49,6 +59,8 @@ All notable changes to this project will be documented in this file.
 - `map_keys`, `map_values`, `filter_keys`, `filter_values`, `get_value`,
   `get_value_or_default` functions in the `mappings` module
 - `utils` module that imports `Pipe`, `Then` and all utility functions
+
+[0.2.1]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.0...v0.2.1
 
 [0.2.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.1.0...v0.2.0
 
