@@ -32,7 +32,7 @@ print(result)
 ```
 
 And, if you're feeling dangerous, override the builtin `filter`, `map`,
-and `all` functions:
+and `all` functions by importing from `pipe-utils.override`:
 
 ```python
 from pipe_utils.override import *
