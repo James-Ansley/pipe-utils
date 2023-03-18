@@ -31,8 +31,8 @@ print(result)
 #  {1: ['i'], 3: ['are'], 4: ['just', 'neat'], 5: ['think', 'pipes']}
 ```
 
-And, if you're feeling dangerous, override the builtin `filter`, `map`,
-and `all` functions by importing from `pipe-utils.override`:
+And, if you're feeling dangerous, override builtin functions
+like `filter`, `map`, and `all` by importing from `pipe-utils.override`:
 
 ```python
 from pipe_utils.override import *
