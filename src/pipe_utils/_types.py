@@ -12,6 +12,7 @@ __all__ = [
     "H",
     "E",
     "EType",
+    "ExceptionHandler",
     "NestedIter",
 
     # Curry
@@ -38,11 +39,13 @@ nothing = object()
 
 T = TypeVar("T")
 V = TypeVar("V")
+R = TypeVar("R")
 K = TypeVar("K")
 H = TypeVar("H", bound=Hashable)
 
 E = TypeVar("E", bound=BaseException)
 EType = Type[E] | tuple[Type[E], ...]
+ExceptionHandler = Callable[[E], R]
 
 NestedIter = Iterable[Iterable[T]]
 

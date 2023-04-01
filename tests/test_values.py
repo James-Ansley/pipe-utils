@@ -1,9 +1,10 @@
 from fractions import Fraction
 
 import pytest
+from pytest import raises
 
-from pipe_utils.values import *
 from pipe_utils import it
+from pipe_utils.values import *
 
 
 def test_not():
@@ -113,6 +114,18 @@ def test_is_none():
 def test_is_not_none():
     assert not is_not_none(None)
     assert is_not_none([])
+
+
+def test_raise():
+    with raises(ZeroDivisionError):
+        raise_(ZeroDivisionError())
+    with raises(ZeroDivisionError):
+        raise_(ZeroDivisionError)
+    with raises(ValueError) as e:
+        raise_(ValueError("Uh oh!"), from_=TypeError("Oops!"))
+    assert str(e.value) == "Uh oh!"
+    assert isinstance(e.value.__cause__, TypeError)
+    assert str(e.value.__cause__) == "Oops!"
 
 
 def test_add_by():
@@ -247,23 +260,45 @@ def test_ge():
 
 
 def test_it_is():
-    a, b = object(), object()
-    assert it_is(a)(a)
-    assert it_is(None)(None)
-    assert not it_is(a)(b)
-    assert not it_is(None)(b)
-    assert not it_is(a)(None)
-    assert not it_is([1, 2])([1, 2])
+    with pytest.deprecated_call():
+        a, b = object(), object()
+        assert it_is(a)(a)
+        assert it_is(None)(None)
+        assert not it_is(a)(b)
+        assert not it_is(None)(b)
+        assert not it_is(a)(None)
+        assert not it_is([1, 2])([1, 2])
 
 
 def test_it_is_not():
+    with pytest.deprecated_call():
+        a, b = object(), object()
+        assert not it_is_not(a)(a)
+        assert not it_is_not(None)(None)
+        assert it_is_not(a)(b)
+        assert it_is_not(None)(b)
+        assert it_is_not(a)(None)
+        assert it_is_not([1, 2])([1, 2])
+
+
+def test_is():
     a, b = object(), object()
-    assert not it_is_not(a)(a)
-    assert not it_is_not(None)(None)
-    assert it_is_not(a)(b)
-    assert it_is_not(None)(b)
-    assert it_is_not(a)(None)
-    assert it_is_not([1, 2])([1, 2])
+    assert is_(a)(a)
+    assert is_(None)(None)
+    assert not is_(a)(b)
+    assert not is_(None)(b)
+    assert not is_(a)(None)
+    assert not is_([1, 2])([1, 2])
+
+
+def test_is_not():
+    a, b = object(), object()
+    assert not is_not(a)(a)
+    assert not is_not(None)(None)
+    assert is_not(a)(b)
+    assert is_not(None)(b)
+    assert is_not(a)(None)
+    assert is_not([1, 2])([1, 2])
 
 
 def test_bit_and():

@@ -1,8 +1,6 @@
+from pytest import raises
+
 from pipe_utils.override import *
-
-
-def is_even(e):
-    return e % 2 == 0
 
 
 def test_override_all():
@@ -36,3 +34,53 @@ def test_override_slice():
     assert (Pipe([1, 2, 3, 4]) | slice(2) | list).get() == [1, 2]
     assert (Pipe([1, 2, 3, 4]) | slice(1, 3) | list).get() == [2, 3]
     assert (Pipe([1, 2, 3, 4]) | slice(0, 4, 2) | list).get() == [1, 3]
+
+
+def test_not():
+    assert Not(is_even)(5)
+    assert not Not(is_even)(4)
+
+
+def test_or():
+    assert Or(is_even, it > 4)(2)
+    assert Or(is_even, it > 4)(5)
+    assert not Or(is_even, it > 4)(1)
+
+
+def test_and():
+    assert And(it % 2 == 0, it > 4)(10)
+    assert not And(it % 2 == 0, it > 4)(2)
+    assert not And(it % 2 == 0, it > 4)(5)
+    assert not And(it % 2 == 0, it > 4)(1)
+
+
+def test_is():
+    a, b = object(), object()
+    assert Is(a)(a)
+    assert Is(None)(None)
+    assert not Is(a)(b)
+    assert not Is(None)(b)
+    assert not Is(a)(None)
+    assert not Is([1, 2])([1, 2])
+
+
+def test_is_not():
+    a, b = object(), object()
+    assert not IsNot(a)(a)
+    assert not IsNot(None)(None)
+    assert IsNot(a)(b)
+    assert IsNot(None)(b)
+    assert IsNot(a)(None)
+    assert IsNot([1, 2])([1, 2])
+
+
+def test_raise():
+    with raises(ZeroDivisionError):
+        Raise(ZeroDivisionError())
+    with raises(ZeroDivisionError):
+        Raise(ZeroDivisionError)
+    with raises(ValueError) as e:
+        Raise(ValueError("Uh oh!"), from_=TypeError("Oops!"))
+    assert str(e.value) == "Uh oh!"
+    assert isinstance(e.value.__cause__, TypeError)
+    assert str(e.value.__cause__) == "Oops!"

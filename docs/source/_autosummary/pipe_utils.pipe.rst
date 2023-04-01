@@ -23,7 +23,7 @@
 
    .. autosummary::
    
-      It
+      Catch
       Pipe
       Then
    

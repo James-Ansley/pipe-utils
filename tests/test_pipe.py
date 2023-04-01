@@ -4,7 +4,7 @@ from io import StringIO
 from pytest import raises
 
 from pipe_utils import Pipe
-from pipe_utils.pipe import Then
+from pipe_utils.pipe import Catch, Then
 
 
 def test_pipe_yields_data():
@@ -85,13 +85,51 @@ def test_catch():
 
 def test_pipe_err_state_is_chained():
     assert (
-        Pipe(1)
-        | (operator.truediv, 0)
-        | (operator.add, 1)
-        | Then(print, end="")
-    ).get_or_default("Oops!") == "Oops!"
+                   Pipe(1)
+                   | (operator.truediv, 0)
+                   | (operator.add, 1)
+                   | Then(print, end="")
+           ).get_or_default("Oops!") == "Oops!"
 
 
 def test_pipe_with_non_function():
     with raises(ValueError):
         Pipe([]) | 4
+
+
+def test_get_or_default_ignores_wrong_exception_type():
+    with raises(TypeError):
+        p = Pipe([]) | (operator.add, "abc")
+        p.get_or_default("Oops!", catch=ValueError)
+
+    with raises(ValueError):
+        p = Pipe("Hello") | int
+        p.get_or_default("Oops!", catch=IndexError)
+
+
+def test_get_or_raise_ignores_wrong_exception_type():
+    class PipeError(Exception): ...
+
+    with raises(TypeError):
+        p = Pipe([]) | (operator.add, "abc")
+        p.get_or_raise(PipeError("Oops!"), catch=ValueError)
+
+    with raises(ValueError):
+        p = Pipe("Hello") | int
+        p.get_or_raise(PipeError("Oops!"), catch=IndexError)
+
+
+def test_pipe_then_and_catch_classes():
+    assert (
+                   Pipe([-1, 0, 1])
+                   | Then(lambda data: map(lambda x: 1 / x, data))
+                   | Then(list)
+                   | Catch(ZeroDivisionError, lambda _: [0])
+           ).get() == [0]
+    with raises(ZeroDivisionError):
+        (
+                Pipe([-1, 0, 1])
+                | Then(lambda data: map(lambda x: 1 / x, data))
+                | Then(list)
+                | Catch(TypeError, lambda _: [0])
+        ).get()

@@ -52,6 +52,7 @@
       min_by
       none
       not_contains
+      pad_with
       partition
       peek
       reduce

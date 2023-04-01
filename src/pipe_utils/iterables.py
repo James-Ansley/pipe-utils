@@ -50,6 +50,7 @@ __all__ = [
     "min_by",
     "none",
     "not_contains",
+    "pad_with",
     "partition",
     "peek",
     "reduce",
@@ -517,6 +518,25 @@ def not_contains(value: T) -> BoolReducer:
     return lambda data: all(e != value for e in data)
 
 
+def pad_with(
+        fill: V, length: int = None
+) -> Callable[[Iterable[T]], Iterable[T | V]]:
+    """
+    Returns a callable that pads an iterable with the specified character to
+    the given length. If the length is None, an infinite iterable is returned.
+    Raises a ValueError if the length is negative.
+
+    If the iterable is longer than length, the iterable is sliced. e.g.
+    :code:`pad_with("*", 2)([1, 2, 3, 4]) ≈≈ [1, 2]`
+    """
+    if length is None:
+        return lambda data: itertools.chain(data, itertools.repeat(fill))
+    else:
+        return lambda data: itertools.islice(
+            itertools.chain(data, itertools.repeat(fill)), length
+        )
+
+
 def partition(
         func: Predicate,
 ) -> Callable[[Iterable[T]], tuple[Iterable[T], Iterable[T]]]:
@@ -778,26 +798,43 @@ def try_map(
     return _func
 
 
-def windowed(n: int) -> NestedIterCurry:
+def windowed(
+        n: int, *, strict: bool = True, partial: bool = False
+) -> NestedIterCurry:
     """
-    Returns a callable that returns a sliding window of size n over an iterable.
-    Raises a ValueError if the window size is bigger than the given iterable
+    Returns a callable that returns a sliding window of size n over an
+    iterable. If strict is True, Raises a ValueError if the window size is
+    bigger than the given iterable, otherwise an empty iterable is returned.
+    If partial is True, the trailing partial windows at the end are yielded –
+    supersedes the behaviour of strict.
 
     :raises ValueError: if n is non-positive
     """
-    if n <= 0:
+    if n <= 0 and strict:
         raise ValueError("Cannot yield non-positive window sizes")
+    elif n <= 0:
+        return lambda _: tuple()
 
     def _func(data):
         it = iter(data)
         window = deque(itertools.islice(it, n), maxlen=n)
         if len(window) == n:
             yield tuple(window)
+
         elif len(window) < n:
-            raise ValueError("Window is larger than iterable length")
+            if strict:
+                raise ValueError("Window is larger than iterable length")
+            elif not partial:
+                return tuple()
         for x in it:
             window.append(x)
             yield tuple(window)
+        if partial:
+            if len(window) == n:
+                window.popleft()
+            while window:
+                yield tuple(window)
+                window.popleft()
 
     return _func
 

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2]
+
+### Additions
+
+- `pad_with` function has been added to `iterables` module.
+- A `Catch` class has been added as an equivalent to `Pipe.catch` intended to be
+  used with chained `__or__` calls
+- `raise_` function in `values` module that raises an exception. Aliased
+  as `Raise` in `override` module.
+
+### Changes
+
+- `it_is` and `it_is_not` have been **deprecated**, use `is_` and `is_not` 
+  instead for consistency with other naming conventions.
+- `windowed` now has `strict` and `partial` parameters
+- `Pipe` `get_or_default` and `get_or_raise` methods now take a named `catch`
+  parameter that limits the scope of errors that are caught.
+- `override` module now aliases `values` functions `and_`, `or_`, `not_`
+  and `is_` to `And`, `Or`, `Not`, and `Is` to avoid underscore naming
+  convention. Including `is_not` to `IsNot` for consistency with other binary
+  operations.
+
 ## [0.2.1]
 
 ### Additions
@@ -25,8 +47,8 @@ All notable changes to this project will be documented in this file.
   from pipe_utils.override import *
   
   class Foo:
-    def __init__(self, bar):
-        self.bar = bar
+      def __init__(self, bar):
+          self.bar = bar
 
   res = (
       Pipe(Foo(x) for x in range(10))
@@ -59,6 +81,8 @@ All notable changes to this project will be documented in this file.
 - `map_keys`, `map_values`, `filter_keys`, `filter_values`, `get_value`,
   `get_value_or_default` functions in the `mappings` module
 - `utils` module that imports `Pipe`, `Then` and all utility functions
+
+[0.2.2]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.1...v0.2.2
 
 [0.2.1]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.0...v0.2.1
 

@@ -86,7 +86,7 @@ For example::
 
     print(data)  # 12
 
-In this example, it might be cleaner to use the :func:`~pipe_utils.pipe.it` object for slightly cleaner code.
+In this example, it might be cleaner to use the :const:`~pipe_utils.pipe.it` object for slightly cleaner code.
 
 If kwargs are needed, a :class:`~pipe_utils.pipes.Then` object can be constructed with any additional args or kwargs.::
 
@@ -102,11 +102,13 @@ If kwargs are needed, a :class:`~pipe_utils.pipes.Then` object can be constructe
 
 In this example, it might be cleaner to use the :func:`~pipe_utils.iterables.sorted_desc_by` function.
 
+A :class:`~pipe_utils.pipes.Catch` class can also be used with the pipe operator (``|``) as a mirror of :meth:`~pipe_utils.pipe.Pipe.catch`.
+
 
 Getting Data From a Pipe
 ------------------------
 
-There are three ways to get the data from a pipe: :meth:`~pipe_utils.Pipe.get`, :meth:`~pipe_utils.Pipe.get_or_default`, or :meth:`~pipe_utils.Pipe.get_or_raise`.
+There are three ways to get the data from a pipe: :meth:`~pipe_utils.Pipe.get`, :meth:`~pipe_utils.Pipe.get_or_default`, or :meth:`pipe_utils.Pipe.get_or_raise`.
 
 :meth:`~pipe_utils.Pipe.get` will attempt to return the result from the pipe object or raise any errors if the pipe is in error state::
 

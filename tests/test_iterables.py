@@ -1,3 +1,4 @@
+import itertools
 from fractions import Fraction
 from io import StringIO
 from operator import add
@@ -351,6 +352,16 @@ def test_not_contains():
     assert (Pipe([-1]) | concat([0]) | not_contains(0)).get() is False
 
 
+def test_pad_with():
+    assert [*pad_with("*", 5)([1, 2, 3])] == [1, 2, 3, "*", "*"]
+    assert [*pad_with("*", 3)([1, 2, 3])] == [1, 2, 3]
+    assert [*pad_with("*", 2)([1, 2, 3])] == [1, 2]
+    assert [*pad_with("*", 0)([1, 2, 3])] == []
+    assert [*itertools.islice(pad_with("*")([1]), 5)] == [1, "*", "*", "*", "*"]
+    assert [*itertools.islice(pad_with("*", None)([1]), 5)] \
+           == [1, "*", "*", "*", "*"]
+
+
 def test_partition():
     assert (Pipe([]) | partition(is_even) | map_(list) | list).get() == [[], []]
     pipe = (Pipe([1, 2, 3, 4]) | partition(is_even) | map_(list) | list)
@@ -578,6 +589,21 @@ def test_windowed():
     assert (Pipe([1]) | windowed(1) | map_(list) | list).get() == [[1]]
     pipe = (Pipe([1, 2, 3]) | windowed(2) | map_(list) | list)
     assert pipe.get() == [[1, 2], [2, 3]]
+
+    assert [*windowed(4, strict=False)([1, 2, 3])] == []
+    assert [*windowed(-1, strict=False)([1, 2, 3])] == []
+    assert [*windowed(-1, strict=False, partial=True)([1, 2, 3])] == []
+    assert [[*e] for e in windowed(1, strict=False)([1])] == [[1]]
+    assert [[*e] for e in
+            windowed(2, strict=False)([1, 2, 3])] == [[1, 2], [2, 3]]
+    assert [[*e] for e in windowed(2, strict=False, partial=True)([1, 2, 3])]\
+           == [[1, 2], [2, 3], [3]]
+    assert [[*e] for e in windowed(3, strict=False, partial=True)([1, 2, 3])]\
+           == [[1, 2, 3], [2, 3], [3]]
+    assert [[*e] for e in windowed(3, partial=True)([1, 2, 3])]\
+           == [[1, 2, 3], [2, 3], [3]]
+    assert [[*e] for e in windowed(4, strict=False, partial=True)([1, 2, 3])]\
+           == [[1, 2, 3], [2, 3], [3]]
 
     with raises(ValueError):
         (Pipe([]) | windowed(1) | list).get()
