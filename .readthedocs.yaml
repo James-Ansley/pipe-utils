@@ -11,11 +11,11 @@ build:
 sphinx:
   configuration: docs/source/conf.py
 
-#formats:
-#  - pdf
+formats:
+  - pdf
 
 python:
   install:
     - method: pip
       path: .
-    - requirements: docs/requirements_docs.txt
+    - requirements: docs/requirements.txt

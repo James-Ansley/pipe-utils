@@ -1,5 +1,5 @@
 from collections.abc import Callable, Hashable, Iterable, Mapping
-from typing import Type, TypeVar
+from typing import Any, Type, TypeVar
 
 __all__ = [
     # Singleton
@@ -8,6 +8,7 @@ __all__ = [
     # Generic Types
     "T",
     "V",
+    "R",
     "K",
     "H",
     "E",
@@ -32,7 +33,9 @@ __all__ = [
     # FuncUtils
     "Action",
     "Function",
+    "IndexedFunction",
     "Predicate",
+    "IndexedPredicate",
 ]
 
 nothing = object()
@@ -61,6 +64,8 @@ IntReducer = Callable[[Iterable[T]], int]
 StrReducer = Callable[[Iterable[T]], str]
 Consumer = Callable[[Iterable[T]], None]
 
-Action = Callable[[T], None]
+Action = Callable[[T], Any]
 Function = Callable[[T], V]
+IndexedFunction = Callable[[int, T], V]
 Predicate = Callable[[T], bool]
+IndexedPredicate = Callable[[int, T], bool]

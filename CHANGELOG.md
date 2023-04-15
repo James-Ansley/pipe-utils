@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0]
+
+### Additions
+
+- `raises` function in `values`. Similar to `raise_` but returns a callable.
+- Several functions in the `iterables` module:
+  - `strip`, `lstrip`, `rstrip` and `strip_while`
+  - `replace` function
+  - `extend` and `extend_left` as replacements to `concat` and `concat_after`
+  - `map_indexed` and `filter_indexed` functions
+  - `wrap` function
+
+### Changes
+
+- **Deprecated modules and functions have been removed:** `utils` module and
+  several functions in `values`
+- `concat` and `concat_after` are now **deprecated** use `extend`
+  and `extend_left` instead
+- `try_map` now ignores errors by default and will only include default values
+  if the (now named) default parameter is given. `err` parameter is also changed
+  to `catch`
+- `raise_` and `Raise` functions now take `nothing` singleton for the `from_`
+  parameter allowing for exception chain disabling with the `raise E from None`
+  idiom.
+- `Pipe.get_or_raise` now takes a named `chained` parameter that determines
+  whether errors should be chained with the caught Pipe exceptions.
+- `chunked` now takes `partial` and `strict` arguments.
+- Typehints have been updated for `Or`/`or_` and `And`/`and_` to indicate
+  non-boolean return types.
+
 ## [0.2.2]
 
 ### Additions
@@ -14,7 +44,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes
 
-- `it_is` and `it_is_not` have been **deprecated**, use `is_` and `is_not` 
+- `it_is` and `it_is_not` have been **deprecated**, use `is_` and `is_not`
   instead for consistency with other naming conventions.
 - `windowed` now has `strict` and `partial` parameters
 - `Pipe` `get_or_default` and `get_or_raise` methods now take a named `catch`
@@ -81,6 +111,8 @@ All notable changes to this project will be documented in this file.
 - `map_keys`, `map_values`, `filter_keys`, `filter_values`, `get_value`,
   `get_value_or_default` functions in the `mappings` module
 - `utils` module that imports `Pipe`, `Then` and all utility functions
+
+[0.3.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.2...v0.3.0
 
 [0.2.2]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.1...v0.2.2
 

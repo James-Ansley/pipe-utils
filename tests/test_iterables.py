@@ -3,6 +3,7 @@ from fractions import Fraction
 from io import StringIO
 from operator import add
 
+import pytest
 from pytest import raises
 
 from pipe_utils import Pipe, it
@@ -56,47 +57,72 @@ def test_chunked():
             | list
     )
     assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+    pipe = (
+            Pipe(range(10))
+            | chunked(3, partial=True)
+            | map_(list)
+            | list
+    )
+    assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
+    pipe = (
+            Pipe(range(10))
+            | chunked(3, strict=False)
+            | map_(list)
+            | list
+    )
+    assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+    pipe = (
+            Pipe(range(10))
+            | chunked(3, strict=False, partial=True)
+            | map_(list)
+            | list
+    )
+    assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
 
     with raises(ValueError):
         Pipe([]) | chunked(0)
     with raises(ValueError):
         Pipe([]) | chunked(-1)
+    with raises(ValueError):
+        (Pipe(range(10)) | chunked(3) | map_(list) | list).get()
 
 
 def test_concat():
-    assert (Pipe([]) | concat([]) | list).get() == []
-    assert (Pipe(["a"]) | concat([]) | list).get() == ["a"]
-    assert (Pipe([]) | concat(["b"]) | list).get() == ["b"]
-    assert (Pipe(["a"]) | concat(["b"]) | list).get() == ["a", "b"]
-    pipe = (Pipe(["a", "b", "c"])
-            | concat(["d", "e", "f"])
-            | list)
-    assert pipe.get() == list("abcdef")
+    with pytest.deprecated_call():
+        assert (Pipe([]) | concat([]) | list).get() == []
+        assert (Pipe(["a"]) | concat([]) | list).get() == ["a"]
+        assert (Pipe([]) | concat(["b"]) | list).get() == ["b"]
+        assert (Pipe(["a"]) | concat(["b"]) | list).get() == ["a", "b"]
+        pipe = (Pipe(["a", "b", "c"])
+                | concat(["d", "e", "f"])
+                | list)
+        assert pipe.get() == list("abcdef")
 
 
 def test_concat_after():
-    assert (Pipe([]) | concat_after([]) | list).get() == []
-    assert (Pipe(["a"]) | concat_after([]) | list).get() == ["a"]
-    assert (Pipe([]) | concat_after(["b"]) | list).get() == ["b"]
-    assert (Pipe(["a"]) | concat_after(["b"]) | list).get() == ["b", "a"]
-    pipe = (Pipe(["a", "b", "c"])
-            | concat_after(["d", "e", "f"])
-            | list)
-    assert pipe.get() == list("defabc")
+    with pytest.deprecated_call():
+        assert (Pipe([]) | concat_after([]) | list).get() == []
+        assert (Pipe(["a"]) | concat_after([]) | list).get() == ["a"]
+        assert (Pipe([]) | concat_after(["b"]) | list).get() == ["b"]
+        assert (Pipe(["a"]) | concat_after(["b"]) | list).get() == ["b", "a"]
+        pipe = (Pipe(["a", "b", "c"])
+                | concat_after(["d", "e", "f"])
+                | list)
+        assert pipe.get() == list("defabc")
 
 
 def test_contains():
     assert (Pipe([]) | contains(0)).get() is False
     assert (Pipe([-1, 1]) | contains(0)).get() is False
     assert (Pipe([-1, 0, 1]) | contains(0)).get() is True
-    assert (Pipe([-1]) | concat([0]) | contains(0)).get() is True
+    assert (Pipe([-1]) | extend([0]) | contains(0)).get() is True
 
 
 def test_contains_all():
     assert (Pipe([]) | contains_all([0])).get() is False
     assert (Pipe([-1, 1]) | contains_all([0, 1])).get() is False
     assert (Pipe([-1, 0, 1]) | contains_all([0, -1])).get() is True
-    assert (Pipe([-1]) | concat([0]) | contains_all([-1, 0])).get() is True
+    assert (Pipe([-1]) | extend([0]) | contains_all([-1, 0])).get() is True
 
 
 def test_count():
@@ -170,6 +196,36 @@ def test_drop_while():
     assert (Pipe([0, 0, 0]) | drop_while(is_even) | list).get() == []
 
 
+def test_extend():
+    assert (Pipe([]) | extend([]) | list).get() == []
+    assert (Pipe(["a"]) | extend([]) | list).get() == ["a"]
+    assert (Pipe([]) | extend(["b"]) | list).get() == ["b"]
+    assert (Pipe(["a"]) | extend(["b"]) | list).get() == ["a", "b"]
+    pipe = (Pipe(["a", "b", "c"])
+            | extend(["d", "e", "f"])
+            | list)
+    assert pipe.get() == list("abcdef")
+
+
+def test_extend_left():
+    assert (Pipe([]) | extend_left([]) | list).get() == []
+    assert (Pipe(["a"]) | extend_left([]) | list).get() == ["a"]
+    assert (Pipe([]) | extend_left(["b"]) | list).get() == ["b"]
+    assert (Pipe(["a"]) | extend_left(["b"]) | list).get() == ["b", "a"]
+    pipe = (Pipe(["a", "b", "c"])
+            | extend_left(["d", "e", "f"])
+            | list)
+    assert pipe.get() == list("defabc")
+    pipe = (Pipe(["a", "b", "c"])
+            | extend_left(["d", "e", "f"], reverse=True)
+            | list)
+    assert pipe.get() == list("fedabc")
+    pipe = (Pipe(["a", "b", "c"])
+            | extend_left(iter(["d", "e", "f"]), reverse=True)
+            | list)
+    assert pipe.get() == list("fedabc")
+
+
 def test_filter():
     assert (Pipe([]) | filter_(is_even) | list).get() == []
     pipe = Pipe(range(11)) | filter_(is_even) | list
@@ -181,6 +237,14 @@ def test_filter_false():
     assert (Pipe([-1, 0, 1]) | filter_false(is_even) | list).get() == [-1, 1]
     pipe = (Pipe(range(11)) | filter_false(is_even) | list)
     assert pipe.get() == [1, 3, 5, 7, 9]
+
+
+def test_filter_indexed():
+    data = [-4, 2, 6, -2, 8, 3, 0]
+    assert [*filter_indexed(lambda i, e: i % 2 == 0 and e > 0)(data)] == [6, 8]
+    assert [*filter_indexed(lambda i, e: i % 2 == 0 and e > 0)([])] == []
+    assert [*filter_indexed(lambda i, e: i % 2 == 0 and e > 0, start=1)(data)] \
+           == [2, 3]
 
 
 def test_find():
@@ -227,16 +291,17 @@ def test_fold():
     assert (Pipe([1, 2, 3]) | fold(1, add)).get() == 7
 
 
-# noinspection PyShadowingNames,PyDefaultArgument
+# noinspection PyDefaultArgument
 def test_for_each():
     res = []
-    Pipe([]) | for_each(lambda e, res=res: res.append(e))
+    Pipe([]) | for_each(lambda e, r=res: r.append(e))
     assert res == []
     res = []
-    Pipe([1, 2, 3]) | for_each(lambda e, res=res: res.append(e))
+    Pipe([1, 2, 3]) | for_each(lambda e, r=res: r.append(e))
     assert res == [1, 2, 3]
 
 
+# noinspection PyShadowingNames,PyDefaultArgument
 def test_group_by():
     assert (Pipe([]) | group_by(len) | dict).get() == {}
     assert (Pipe(["a"]) | group_by(len) | dict).get() == {1: ["a"]}
@@ -318,11 +383,28 @@ def test_last():
         Pipe([]) | last(-1)
 
 
+def test_lstrip():
+    assert [*lstrip(0)([0, 0, 3, 5, 0, 0])] == [3, 5, 0, 0]
+    assert [*lstrip(0)([3, 5, 0, 0])] == [3, 5, 0, 0]
+    assert [*lstrip(0)([0, 0, 3, 5])] == [3, 5]
+    assert [*lstrip(0)([3, 5])] == [3, 5]
+    assert [*lstrip(0)([])] == []
+
+
 def test_map():
     pipe = Pipe(range(11)) | filter_(is_even) | map_(lambda e: e * 2) | list
     assert pipe.get() == [0, 4, 8, 12, 16, 20]
     pipe = Pipe([[3, 2, 1], [6, 5, 4]]) | map_(sorted) | list
     assert pipe.get() == [[1, 2, 3], [4, 5, 6]]
+
+
+def test_map_indexed():
+    assert [*map_indexed(lambda i, e: str(i) + e)("abc")] == ["0a", "1b", "2c"]
+    assert [*map_indexed(lambda i, e: e)("")] == []
+    assert [*map_indexed(lambda i, e: str(i) + e, start=1)("abc")] \
+           == ["1a", "2b", "3c"]
+    assert [*map_indexed(lambda i, e: str(i) + e, start=-1)("abc")] \
+           == ["-1a", "0b", "1c"]
 
 
 def test_max_by():
@@ -349,7 +431,7 @@ def test_not_contains():
     assert (Pipe([]) | not_contains(0)).get() is True
     assert (Pipe([-1, 1]) | not_contains(0)).get() is True
     assert (Pipe([-1, 0, 1]) | not_contains(0)).get() is False
-    assert (Pipe([-1]) | concat([0]) | not_contains(0)).get() is False
+    assert (Pipe([-1]) | extend([0]) | not_contains(0)).get() is False
 
 
 def test_pad_with():
@@ -372,21 +454,22 @@ def test_partition():
     assert pipe.get() == [[], [1, 3, 5, 7]]
 
 
-# noinspection PyShadowingNames,PyDefaultArgument
+# noinspection PyDefaultArgument
 def test_peek():
     res = []
-    pipe = (Pipe([1, 2, 3]) | peek(lambda e, res=res: res.append(e)) | list)
+    pipe = (Pipe([1, 2, 3]) | peek(lambda e, r=res: r.append(e)) | list)
     assert res == [1, 2, 3] and pipe.get() == [1, 2, 3]
 
     # is lazy
     res = []
     pipe = (Pipe([0, 0, 1, 2])
-            | peek(lambda e, res=res: res.append(e))
+            | peek(lambda e, r=res: r.append(e))
             | first(2)
             | list)
     assert res == [0, 0] and pipe.get() == [0, 0]
 
 
+# noinspection PyShadowingNames,PyDefaultArgument
 def test_reduce():
     pipe = Pipe(range(11)) | reduce(add)
     assert pipe.get() == sum(range(11))
@@ -408,6 +491,24 @@ def test_remove_last():
     assert (Pipe([1, 2, 3, 2]) | remove_last(4) | list).get() == [1, 2, 3, 2]
     assert (Pipe([]) | remove_last(4) | list).get() == []
     assert (Pipe([1]) | remove_last(1) | list).get() == []
+
+
+def test_replace():
+    assert [*replace("a", "x")(["a", "b", "c"])] == ["x", "b", "c"]
+    assert [*replace("d", "x")(["a", "b", "c"])] == ["a", "b", "c"]
+    assert [*replace("a", "x")([])] == []
+    assert [*replace("a", None)(["a", "b", "c"])] == [None, "b", "c"]
+    assert [*replace("a", "x")(["a", "b", "a"])] == ["x", "b", "x"]
+    assert [*replace("a", "x")(["a", "a", "a"])] == ["x", "x", "x"]
+    assert [*replace(None, "X")(["a", None, "c"])] == ["a", "X", "c"]
+
+
+def test_rstrip():
+    assert [*rstrip(0)([0, 0, 3, 5, 0, 0])] == [0, 0, 3, 5]
+    assert [*rstrip(0)([3, 5, 0, 0])] == [3, 5]
+    assert [*rstrip(0)([0, 0, 3, 5])] == [0, 0, 3, 5]
+    assert [*rstrip(0)([3, 5])] == [3, 5]
+    assert [*rstrip(0)([])] == []
 
 
 def test_scan():
@@ -485,6 +586,24 @@ def test_starred():
     assert stream.getvalue() == "1~2"
 
 
+def test_strip():
+    assert [*strip(0)([0, 0, 3, 5, 0, 0])] == [3, 5]
+    assert [*strip(0)([3, 5, 0, 0])] == [3, 5]
+    assert [*strip(0)([0, 0, 3, 5])] == [3, 5]
+    assert [*strip(0)([3, 5])] == [3, 5]
+    assert [*strip(0)([])] == []
+
+
+def test_strip_while():
+    assert [*strip_while(it % 2 == 0)([0, 2, 3, 5, 6, 8])] == [3, 5]
+    assert [*strip_while(it % 2 == 0)([3, 5, 6, 8])] == [3, 5]
+    assert [*strip_while(it % 2 == 0)([0, 2, 3, 5])] == [3, 5]
+    assert [*strip_while(it % 2 == 0)([3, 5])] == [3, 5]
+    assert [*strip_while(it % 2 == 0)([])] == []
+    assert [*strip_while(it % 2 == 0)([0, 1, 0, 1, 0])] == [1, 0, 1]
+    assert [*strip_while(it % 2 == 0)([0, 0, 0])] == []
+
+
 def test_sum_by():
     assert sum_by(it * it)([1, 2, 3, 4]) == 30
     assert sum_by(len)(["1", "22", "ttt"]) == 6
@@ -558,30 +677,29 @@ def test_transpose():
 
 def test_try_map():
     pipe = (Pipe([])
-            | try_map(lambda x: 1 / x, ZeroDivisionError, 0)
+            | try_map(lambda x: 1 / x, ZeroDivisionError, default=0)
             | list)
     assert pipe.get() == []
     pipe = (Pipe(range(1, 3))
             | map_(Fraction)
-            | try_map(lambda x: 1 / x, ZeroDivisionError, Fraction(0))
+            | try_map(lambda x: 1 / x, ZeroDivisionError, default=Fraction(0))
             | list)
     assert pipe.get() == [Fraction(1, 1), Fraction(1, 2)]
     pipe = (Pipe(range(-1, 2))
             | map_(Fraction)
-            | try_map(lambda x: 1 / x, ZeroDivisionError, Fraction(0))
+            | try_map(lambda x: 1 / x, ZeroDivisionError, default=Fraction(0))
             | list)
     assert pipe.get() == [Fraction(-1, 1), Fraction(0, 1), Fraction(1, 1)]
     pipe = (Pipe(range(-1, 2))
             | map_(Fraction)
-            | try_map(lambda x: 1 / x, default=ZeroDivisionError,
-                      ignore_errors=True)
+            | try_map(lambda x: 1 / x)
             | list)
     assert pipe.get() == [Fraction(-1, 1), Fraction(1, 1)]
 
     with raises(ZeroDivisionError):
         (Pipe(range(-1, 2))
          | map_(Fraction)
-         | try_map(lambda x: 1 / x, IndexError, Fraction(0))
+         | try_map(lambda x: 1 / x, IndexError, default=Fraction(0))
          | list).get()
 
 
@@ -596,13 +714,13 @@ def test_windowed():
     assert [[*e] for e in windowed(1, strict=False)([1])] == [[1]]
     assert [[*e] for e in
             windowed(2, strict=False)([1, 2, 3])] == [[1, 2], [2, 3]]
-    assert [[*e] for e in windowed(2, strict=False, partial=True)([1, 2, 3])]\
+    assert [[*e] for e in windowed(2, strict=False, partial=True)([1, 2, 3])] \
            == [[1, 2], [2, 3], [3]]
-    assert [[*e] for e in windowed(3, strict=False, partial=True)([1, 2, 3])]\
+    assert [[*e] for e in windowed(3, strict=False, partial=True)([1, 2, 3])] \
            == [[1, 2, 3], [2, 3], [3]]
-    assert [[*e] for e in windowed(3, partial=True)([1, 2, 3])]\
+    assert [[*e] for e in windowed(3, partial=True)([1, 2, 3])] \
            == [[1, 2, 3], [2, 3], [3]]
-    assert [[*e] for e in windowed(4, strict=False, partial=True)([1, 2, 3])]\
+    assert [[*e] for e in windowed(4, strict=False, partial=True)([1, 2, 3])] \
            == [[1, 2, 3], [2, 3], [3]]
 
     with raises(ValueError):
@@ -632,3 +750,18 @@ def test_unzip():
             | map_(list)
             | list)
     assert pipe.get() == [[1, 3, 5], [2, 4, 6]]
+
+
+def test_wrap():
+    assert (Pipe([]) | wrap([]) | list).get() == []
+    assert (Pipe(["a"]) | wrap([]) | list).get() == ["a"]
+    assert (Pipe([]) | wrap(["b"]) | list).get() == ["b", "b"]
+    assert (Pipe(["a"]) | wrap(["b"]) | list).get() == ["b", "a", "b"]
+    pipe = (Pipe(["a", "b", "c"])
+            | wrap(iter(["d", "e", "f"]))
+            | list)
+    assert pipe.get() == list("defabcdef")
+    pipe = (Pipe(["a", "b", "c"])
+            | wrap(iter(["d", "e", "f"]), reverse_left=True)
+            | list)
+    assert pipe.get() == list("fedabcdef")

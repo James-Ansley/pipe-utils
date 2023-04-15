@@ -104,6 +104,40 @@ In this example, it might be cleaner to use the :func:`~pipe_utils.iterables.sor
 
 A :class:`~pipe_utils.pipes.Catch` class can also be used with the pipe operator (``|``) as a mirror of :meth:`~pipe_utils.pipe.Pipe.catch`.
 
+A Note on Catching Exceptions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Many of the ``pipe-utils`` utility functions are lazy.
+This can lead to unexpected behaviour when using :meth:`~pipe_utils.pipe.Pipe.catch` or :class:`~pipe_utils.pipe.Catch`.
+It is important to remember that :meth:`~pipe_utils.pipe.Pipe.catch` and :class:`~pipe_utils.pipe.Catch` only catch exceptions *that have already been raised*.
+
+Take the following code as an example::
+
+    from pipe_utils.override import *
+
+    result = (
+        Pipe(range(-10, 11))
+        | map(1 / it)
+        | Catch(ZeroDivisionError, lambda e: Raise(ValueError("Oops!"), from_=e))
+        | list
+    ).get()
+
+This would result in a ``ZeroDivisionError`` being raised.
+Here, the ``map`` operation is lazy. Even though this is eventually where the error occurs, it has not been raised by the time the ``Catch`` call is made.
+
+In order to properly catch this exception, the iterable produced by ``map`` must first be consumed::
+
+    from pipe_utils.override import *
+
+    result = (
+        Pipe(range(-10, 11))
+        | map(1 / it)
+        | list
+        | Catch(ZeroDivisionError, lambda e: Raise(ValueError("Oops!"), from_=e))
+    ).get()
+
+As an aside, in this scenario it would be better to use :meth:`~pipe_utils.Pipe.get_or_raise` or :func:`~pipe_utils.iterables.try_map` instead of :class:`~pipe_utils.pipe.Catch`.
+
 
 Getting Data From a Pipe
 ------------------------

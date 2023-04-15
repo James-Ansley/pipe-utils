@@ -29,8 +29,11 @@
       drop_last
       drop_last_while
       drop_while
+      extend
+      extend_left
       filter_
       filter_false
+      filter_indexed
       find
       find_last
       first
@@ -47,7 +50,9 @@
       is_not_empty
       join_to_str
       last
+      lstrip
       map_
+      map_indexed
       max_by
       min_by
       none
@@ -58,6 +63,8 @@
       reduce
       remove
       remove_last
+      replace
+      rstrip
       scan
       slice_
       sorted_by
@@ -66,6 +73,8 @@
       split_by
       starmap
       starred
+      strip
+      strip_while
       sum_by
       take
       take_last
@@ -76,6 +85,7 @@
       try_map
       unzip
       windowed
+      wrap
    
    
 

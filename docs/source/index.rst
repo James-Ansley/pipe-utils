@@ -17,9 +17,7 @@ Example
 
 .. code-block::
 
-    from pipe_utils import Pipe
-    from pipe_utils.iterables import *
-    from pipe_utils.mappings import *
+    from pipe_utils import *
 
     words = "I just think pipes are neat"
 

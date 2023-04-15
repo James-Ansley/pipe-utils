@@ -17,7 +17,7 @@ from .mappings import *
 # noinspection PyUnresolvedReferences
 from .values import *
 
-# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences,PyShadowingBuiltins
 from .iterables import (
     filter_ as filter,
     map_ as map,

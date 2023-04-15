@@ -10,7 +10,7 @@ pip install pipe-utils
 
 ## Docs
 
-https://pipe-utils.rtfd.io
+[https://pipe-utils.rtfd.io](https://pipe-utils.rtfd.io)
 
 ## Example
 
@@ -32,7 +32,7 @@ print(result)
 ```
 
 And, if you're feeling dangerous, override builtin functions
-like `filter`, `map`, and `all` by importing from `pipe-utils.override`:
+like `filter`, `map`, and `all` by importing from `pipe_utils.override`:
 
 ```python
 from pipe_utils.override import *

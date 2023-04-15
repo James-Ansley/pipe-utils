@@ -1,3 +1,4 @@
+import pytest
 from pytest import raises
 
 from pipe_utils.override import *
@@ -75,12 +76,22 @@ def test_is_not():
 
 
 def test_raise():
-    with raises(ZeroDivisionError):
+    with pytest.raises(ZeroDivisionError):
         Raise(ZeroDivisionError())
-    with raises(ZeroDivisionError):
+    with pytest.raises(ZeroDivisionError) as e:
         Raise(ZeroDivisionError)
-    with raises(ValueError) as e:
+    assert e.value.__cause__ is None
+    with pytest.raises(ValueError) as e:
         Raise(ValueError("Uh oh!"), from_=TypeError("Oops!"))
     assert str(e.value) == "Uh oh!"
     assert isinstance(e.value.__cause__, TypeError)
     assert str(e.value.__cause__) == "Oops!"
+
+    with pytest.raises(ValueError) as e:
+        try:
+            1 / 0
+        except ZeroDivisionError:
+            Raise(ValueError("Oops!"), from_=None)
+    assert e.value.__suppress_context__ is True
+    assert e.value.__cause__ is None
+    assert str(e.value) == "Oops!"

@@ -43,7 +43,7 @@ class Catch:
         self.handler = handler
 
 
-class Pipe(Generic[T, R]):
+class Pipe(Generic[T]):
     """
     Pipe class that supports chained operations on the given data. If an
     error occurs during the chaining process, the pipe goes into error
@@ -87,7 +87,8 @@ class Pipe(Generic[T, R]):
             return self.then(other.func, *other.args, **other.kwargs)
         elif isinstance(other, Catch):
             return self.catch(other.exception, other.handler)
-        raise ValueError(f"cannot perform pipe with type {type(other)}")
+        else:
+            raise ValueError(f"cannot perform pipe with type {type(other)}")
 
     def catch(
             self,
@@ -100,7 +101,8 @@ class Pipe(Generic[T, R]):
         """
         if isinstance(self._err, exception):
             return Pipe(handler(self._err))
-        return self
+        else:
+            return self
 
     def get(self):
         """
@@ -109,7 +111,8 @@ class Pipe(Generic[T, R]):
         """
         if self._err is not None:
             raise self._err
-        return self._data
+        else:
+            return self._data
 
     def get_or_default(
             self, default: V = None, *, catch: EType = Exception
@@ -127,17 +130,29 @@ class Pipe(Generic[T, R]):
             raise self._err
 
     def get_or_raise(
-            self, exception: E | Type[E], *, catch: EType = Exception,
+            self,
+            exception: E | Type[E],
+            *,
+            catch: EType = Exception,
+            chained: bool = True,
     ) -> T:
         """
         Returns the result of the pipe or raises the given exception if the
         pipe is in error state and the error is of type :code:`catch`. If the
-        error is not of type :code:`catch`, the error itself is raised instead.
+        error is not of type :code:`catch`, the error itself is raised
+        instead.
+
+        If ``chained`` is ``True``, the given exception will be
+        raised from the exception currently in the ``Pipe`` object.
+        Otherwise, the given exception is raised as is – but may still be
+        chained if this is raised during the handling of another exception.
         """
         if self._err is None:
             return self._data
-        elif isinstance(self._err, catch):
+        elif isinstance(self._err, catch) and chained:
             raise exception from self._err
+        elif isinstance(self._err, catch) and not chained:
+            raise exception
         else:
             raise self._err
 

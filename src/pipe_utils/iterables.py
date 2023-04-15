@@ -5,8 +5,10 @@ Contains several utility functions to support processing iterables
 import functools
 import itertools
 from collections import defaultdict, deque
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Reversible, Sequence
 from typing import overload
+
+from deprecated.sphinx import deprecated
 
 from ._types import *
 
@@ -27,8 +29,11 @@ __all__ = [
     "drop_last",
     "drop_last_while",
     "drop_while",
+    "extend",
+    "extend_left",
     "filter_",
     "filter_false",
+    "filter_indexed",
     "find",
     "find_last",
     "first",
@@ -45,7 +50,9 @@ __all__ = [
     "index_of_last",
     "join_to_str",
     "last",
+    "lstrip",
     "map_",
+    "map_indexed",
     "max_by",
     "min_by",
     "none",
@@ -56,6 +63,8 @@ __all__ = [
     "reduce",
     "remove",
     "remove_last",
+    "replace",
+    "rstrip",
     "scan",
     "slice_",
     "sorted_by",
@@ -64,6 +73,8 @@ __all__ = [
     "split_by",
     "starmap",
     "starred",
+    "strip",
+    "strip_while",
     "sum_by",
     "take",
     "take_last",
@@ -73,6 +84,7 @@ __all__ = [
     "transpose",
     "try_map",
     "windowed",
+    "wrap",
     "unzip",
 ]
 
@@ -115,26 +127,48 @@ def associate_with(func: Function) -> Callable[[Iterable[T]], Mapping[T, V]]:
     return lambda data: {k: func(k) for k in data}
 
 
-def chunked(n: int) -> NestedIterCurry:
-    """Returns a callable that yields items split into chunks of size n"""
+def chunked(
+        n: int, *, strict: bool = True, partial: bool = False,
+) -> NestedIterCurry:
+    """
+    Returns a callable that yields items split into chunks of size n. If
+    partial is True, also yields trailing chunk even if it has fewer than n
+    items. If strict is True (and partial is False), will raise a value error
+    if there are fewer than n trailing items at the end of the chunk sequence.
+    """
     if n <= 0:
         raise ValueError("Cannot yield non-positive chunk sizes")
 
     def _func(data):
         data = iter(data)
         while chunk := tuple(itertools.islice(data, n)):
-            yield chunk
+            if len(chunk) == n:
+                yield chunk
+            elif partial:
+                yield chunk
+            elif strict:
+                raise ValueError(
+                    "Chunked iterator has trailing items in strict mode"
+                )
 
     return _func
 
 
+@deprecated(
+    version="0.3.0",
+    reason="Use `extend` instead for consistency with Python naming"
+)
 def concat(other: Iterable[T]) -> IterCurry:
-    """Returns a callable that yield [\\*data, \\*other]"""
+    """Returns a callable that yields [\\*data, \\*other]"""
     return lambda data: itertools.chain(data, other)
 
 
+@deprecated(
+    version="0.3.0",
+    reason="Use `extend_left` instead for consistency with Python naming"
+)
 def concat_after(other: Iterable[T]) -> IterCurry:
-    """Returns a callable that yield [\\*other, \\*data]"""
+    """Returns a callable that yields [\\*other, \\*data]"""
     return lambda data: itertools.chain(other, data)
 
 
@@ -254,6 +288,26 @@ def drop_while(func: Predicate) -> IterCurry:
     return lambda data: itertools.dropwhile(func, data)
 
 
+def extend(other: Iterable[T]) -> IterCurry:
+    """Returns a callable that yields ≈ [\\*data, \\*other]"""
+    return lambda data: itertools.chain(data, other)
+
+
+def extend_left(other: Iterable[T], *, reverse: bool = False) -> IterCurry:
+    """
+    Returns a callable that yields ≈ [\\*other, \\*data]. This does *not*
+    reverse the ``other`` iterable as other similar function do in Python by
+    default. However, calling with reverse = True will yield the equivalent
+    of [ \\*reversed(other), \\*data] even if ``other`` has no default
+    reverse iterator.
+    """
+    if reverse and isinstance(other, Reversible):
+        other = reversed(other)
+    elif reverse:
+        other = reversed(tuple(other))
+    return lambda data: itertools.chain(other, data)
+
+
 def filter_(func: Predicate) -> IterCurry:
     """
     Returns a callable that returns an iterator yielding those items of
@@ -268,6 +322,22 @@ def filter_false(func: Predicate) -> IterCurry:
     the iterable for which func(item) is false.
     """
     return lambda data: itertools.filterfalse(func, data)
+
+
+def filter_indexed(func: IndexedPredicate, *, start: int = 0) -> IterCurry:
+    """
+    Returns a callable that returns an iterator yielding those items of the
+    iterable for which func(i, item) is true where i is the position of the
+    current item offset by the given start value.
+    """
+
+    def _func(data):
+        data = enumerate(data, start=start)
+        for i, e in data:
+            if func(i, e):
+                yield e
+
+    return _func
 
 
 def find(func: Predicate) -> OptionalReducer:
@@ -335,7 +405,7 @@ def fold(initial: T, func: Callable[[T, T], T]) -> Reducer:
 
 def for_each(func: Callable[[T], None]) -> Consumer:
     """
-    Returns a callable that eagerly applies func to each item in a given
+    Returns a callable that eagerly calls func for each item in a given
     iterable
     """
 
@@ -478,12 +548,28 @@ def last(n: int = 1) -> IterCurry:
     return _func
 
 
+def lstrip(value: T) -> IterCurry:
+    """
+    returns a callable that strips all leading values equal to the given value
+    """
+    return drop_while(lambda e: e == value)
+
+
 def map_(func: Function) -> IterMapCurry:
     """
     Returns a callable that returns an iterator yielding those items of
     the iterable mapped with the function func(item)
     """
     return lambda data: map(func, data)
+
+
+def map_indexed(func: IndexedFunction, *, start: int = 0) -> IterMapCurry:
+    """
+    Returns a callable that returns an iterator yielding those items of the
+    iterable mapped with the function func(i, item) where i in the position
+    of the current item in the iterable offset with the given start value.
+    """
+    return lambda data: itertools.starmap(func, enumerate(data, start=start))
 
 
 def max_by(func: Function) -> Reducer:
@@ -611,6 +697,27 @@ def remove_last(value: T) -> IterCurry:
     return _func
 
 
+def replace(old: T, new: V) -> Callable[[Iterable[T]], Iterable[T | V]]:
+    """Returns a callable that replaces all occurrences of *old* with *new*"""
+
+    def func(data):
+        for e in data:
+            if e != old:
+                yield e
+            else:
+                yield new
+
+    return func
+
+
+def rstrip(value: T):
+    """
+    returns a callable that strips all trailing values in an iterable which are
+    equal to the given value
+    """
+    return drop_last_while(lambda e: e == value)
+
+
 def scan(func: Callable[[T, T], T], initial=None) -> IterCurry:
     """Returns a callable that yields accumulated values"""
     return lambda data: itertools.accumulate(data, func, initial=initial)
@@ -694,6 +801,25 @@ def starred(func: Callable[[...], V], **kwargs) -> IterMapCurry:
     return lambda data: func(*data, **kwargs)
 
 
+def strip(value: T) -> IterCurry:
+    """
+    returns a callable that strips all leading and trailing values equal to
+    the given value
+    """
+    return strip_while(lambda e: e == value)
+
+
+def strip_while(func: Predicate) -> IterCurry:
+    """
+    returns a callable that strips all leading and trailing values that
+    satisfy the given predicate.
+
+    Use :func:`drop_while` and :func:`drop_last_while` for the equivalent
+    left and right counterparts
+    """
+    return lambda data: drop_last_while(func)(drop_while(func)(data))
+
+
 def sum_by(func: Callable[[T], V], start: V = 0) -> Callable[[Iterable[T]], V]:
     """Returns a callable that sums an iterable by the given function"""
     return lambda data: sum((func(e) for e in data), start=start)
@@ -772,27 +898,25 @@ def transpose(data: NestedIter) -> NestedIter:
 
 def try_map(
         func: Function,
-        err: EType = Exception,
-        default: V = None,
+        catch: EType = Exception,
         *,
-        ignore_errors: bool = False
+        default: V = nothing,
 ) -> IterMapCurry:
     """
     Returns a callable that attempts to map each item in an iterable.
 
     :param func: The mapping function
-    :param err: The error type(s) that will be excepted
+    :param catch: The error type(s) that will be excepted
     :param default: The value that will be used if the error type err is raised
-    :param ignore_errors: If False, the default value will replace values that
-        error, otherwise values that error are skipped
+        – if not provided the error is simply ignored and no value is yielded
     """
 
     def _func(data):
         for e in data:
             try:
                 yield func(e)
-            except err:
-                if not ignore_errors:
+            except catch:
+                if default is not nothing:
                     yield default
 
     return _func
@@ -851,3 +975,15 @@ def unzip(
         return data.keys(), data.values()
     thing1, thing2 = itertools.tee(data, 2)
     return (e[0] for e in thing1), (e[1] for e in thing2)
+
+
+def wrap(other: Iterable[T], *, reverse_left: bool = False) -> IterCurry:
+    """
+    Returns a callable that yields ≈ [\\*other, \\*data, \\*other]
+    if ``reverse_left`` is True, yields the equivalent of
+    [\\*reversed(other), \\*data, \\*other]
+    """
+    other1, other2 = itertools.tee(other, 2)
+    if reverse_left:
+        other1 = reversed(tuple(other1))
+    return lambda data: itertools.chain(other1, data, other2)
