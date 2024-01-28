@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changes
 
+- **breaking change** `pipe-utils` now requires Python 3.12
 - All functions are now curried and can be called with brackets or the right
   shift operator (e.g. `foo(1)(2)` or `foo >> 1 >> 2`).
   Functions will still work as before.
@@ -157,6 +158,8 @@ All notable changes to this project will be documented in this file.
 - `map_keys`, `map_values`, `filter_keys`, `filter_values`, `get_value`,
   `get_value_or_default` functions in the `mappings` module
 - `utils` module that imports `Pipe`, `Then` and all utility functions
+
+[0.4.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.3.0...v0.4.0
 
 [0.3.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.2.2...v0.3.0
 
