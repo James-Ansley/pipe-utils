@@ -17,14 +17,15 @@ pip install pipe-utils
 ```python
 from pipe_utils import *
 
-words = "I just think pipes are neat"
+words = "I just think pipes are neat!"
 
 result = (
-        Pipe(words)
-        | str.lower
-        | str.split
-        | group_by(len)
-        | sorted_dict
+      Pipe(words)
+      | obj.lower()
+      | obj.replace("!", "")
+      | obj.split()
+      | group_by(len)
+      | sorted_dict()
 ).get()
 
 print(result)
@@ -40,10 +41,28 @@ from pipe_utils.override import *
 data = [[1, -3, 4], [1, 2, 3], [2, 3, 4], [5, -1, 4]]
 
 result = (
-        Pipe(data)
-        | filter(all(it >= 0))
-        | map(sum_by(it * it))
-        | list
+      Pipe(data)
+      | filter(all(it >= 0))
+      | map(sum_by(it * it))
+      | as_list
+).get()
+
+print(result)  # [14, 29]
+```
+
+And, if you're feeling extra dangerous, you can use arrow syntax to clean up
+some of those brackets (and the `P` pipe alias):
+
+```python
+from pipe_utils.override import *
+
+data = [[1, -3, 4], [1, 2, 3], [2, 3, 4], [5, -1, 4]]
+
+result = (
+      P >> data
+      | filter >> all(it >= 0)
+      | map >> sum_by(it * it)
+      | as_list
 ).get()
 
 print(result)  # [14, 29]

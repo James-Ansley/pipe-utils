@@ -62,7 +62,7 @@ For example::
             | str.lower
             | str.split
             | group_by(len)
-            | sorted_dict
+            | sorted_dict()
     ).get()
 
     print(result)

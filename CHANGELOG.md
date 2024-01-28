@@ -2,17 +2,63 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0]
+
+### Additions
+
+- Curry wrapper. Functions can now be decorated with an `@curry` decorator.
+  e.g.:
+  ```python
+  from pipe_utils import curry
+  
+  @curry
+  def foo(x, y, z=3):
+      return [x, y, z]
+  
+  result = foo(z=1)(3)(2)  # or: `foo(z=1) >> 3 >> 2`, or `foo(3, 2, 1)`
+  print(result)  # [3, 2, 1]
+  ```
+- `P` added as a short alias for `Pipe`
+- Pipes can now be created with the `>>` operator: `P >> data | ... `
+- `obj` object to allow for method calls in pipe operations without using
+  lambdas
+- `returns`, and `instance_of` functions in the `values` module
+- `case_match` and `case_when` functions in the `mappings` module
+- `split_by_any` and `split_when` functions to split by containers and
+  predicates respectively
+- `melt` and `unmelt` in the `mappings` module to transform dicts to iterables
+  and back
+- `as_tuple`, `as_tuples`, `as_tuple_of_tuples`, `as_list`, `as_lists`,
+  `as_list_of_lists` functions to easily convert data types
+
+### Changes
+
+- All functions are now curried and can be called with brackets or the right
+  shift operator (e.g. `foo(1)(2)` or `foo >> 1 >> 2`).
+  Functions will still work as before.
+- `get_or_default` is now deprecated, use `get(n, default=...)` instead
+- **breaking change** `first` and `last` now return single unwraped elements —
+  to retrieve an iterable, use `take` and `take_last`
+- **breaking change** `chunked`, `drop`, `drop_last`, `windowed`, no longer
+  eagerly check for value errors
+- **breaking change** `join_to_str` separator args are now keyword only
+- **breaking change** `pad_with` `length` argument now no longer has a default
+  None value
+- **breaking change** `split_by` now takes a single `sep` parameter –
+  use `split_by_any` as a replacement for multiple split values
+- **breaking change** `try_map`, `catch` parameter is now keyword only
+
 ## [0.3.0]
 
 ### Additions
 
 - `raises` function in `values`. Similar to `raise_` but returns a callable.
 - Several functions in the `iterables` module:
-  - `strip`, `lstrip`, `rstrip` and `strip_while`
-  - `replace` function
-  - `extend` and `extend_left` as replacements to `concat` and `concat_after`
-  - `map_indexed` and `filter_indexed` functions
-  - `wrap` function
+    - `strip`, `lstrip`, `rstrip` and `strip_while`
+    - `replace` function
+    - `extend` and `extend_left` as replacements to `concat` and `concat_after`
+    - `map_indexed` and `filter_indexed` functions
+    - `wrap` function
 
 ### Changes
 

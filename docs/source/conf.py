@@ -2,22 +2,28 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
+from pathlib import Path
+import sys
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'pipe-utils'
-copyright = '2023, James Finnie-Ansley'
+copyright = '2024, James Finnie-Ansley'
 author = 'James Finnie-Ansley'
 # release = '0.3.0'
+
+# Custom Extension
+sys.path.append(str((Path(__file__).parent / "exts").resolve()))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    # 'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx_rtd_theme',
+    'curry_autodoc',
 ]
 autosummary_generate = True
 autodoc_mock_imports = ["pylint"]

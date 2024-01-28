@@ -13,6 +13,8 @@
 
    .. autosummary::
    
+      case_match
+      case_when
       filter_keys
       filter_values
       get_value
@@ -21,12 +23,14 @@
       key_view
       map_keys
       map_values
+      melt
       sorted_by_key
       sorted_by_key_by
       sorted_by_value
       sorted_by_value_by
       sorted_dict
       sorted_dict_by
+      unmelt
       value_view
    
    

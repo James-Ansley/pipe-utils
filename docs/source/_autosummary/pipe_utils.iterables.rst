@@ -15,11 +15,16 @@
    
       all_
       any_
+      as_list
+      as_list_of_lists
+      as_lists
+      as_tuple
+      as_tuple_of_tuples
+      as_tuples
       associate
       associate_with
       chunked
-      concat
-      concat_after
+      consume
       contains
       contains_all
       count
@@ -71,6 +76,8 @@
       sorted_desc
       sorted_desc_by
       split_by
+      split_by_any
+      split_when
       starmap
       starred
       strip

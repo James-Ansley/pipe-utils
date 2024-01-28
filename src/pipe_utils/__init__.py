@@ -6,3 +6,4 @@ from .pipe import *
 from .iterables import *
 from .mappings import *
 from .values import *
+from .curry import curry

@@ -58,6 +58,13 @@ def test_clamp():
     assert clamp(0, 10)(10) == 10
 
 
+def test_instance_of():
+    assert instance_of(str)("")
+    assert not instance_of(str)(1)
+    assert instance_of(int)(1)
+    assert not instance_of(int)("")
+
+
 def test_lclamp():
     assert lclamp(0)(5) == 5
     assert lclamp(20)(10) == 20
@@ -146,3 +153,9 @@ def test_is_not():
     assert is_not(None)(b)
     assert is_not(a)(None)
     assert is_not([1, 2])([1, 2])
+
+
+def test_returns():
+    assert returns(5)() == 5
+    value = object()
+    assert returns(value)() is value

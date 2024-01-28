@@ -16,6 +16,8 @@ from .iterables import *
 from .mappings import *
 # noinspection PyUnresolvedReferences
 from .values import *
+# noinspection PyUnresolvedReferences
+from.curry import curry
 
 # noinspection PyUnresolvedReferences,PyShadowingBuiltins
 from .iterables import (

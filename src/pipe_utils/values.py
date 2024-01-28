@@ -6,11 +6,12 @@ import operator
 from collections.abc import Callable
 from typing import Any
 
-from ._types import *
+from .curry import curry
 
 __all__ = [
     "and_",
     "clamp",
+    "instance_of",
     "is_",
     "is_even",
     "is_congruent",
@@ -24,19 +25,28 @@ __all__ = [
     "raise_",
     "raises",
     "rclamp",
+    "returns",
 ]
 
-Cond1 = Callable[[T], V]
-Cond2 = Callable[[T], R]
-Cond = Callable[[T], V | R]
+nothing = object()
 
 
-def and_(cond1: Cond1, cond2: Cond2) -> Cond:
+# TODO List
+# - instance_of
+# - subclass_of
+
+
+@curry
+def and_[T, V1, V2](
+      cond1: Callable[[T], V1],
+      cond2: Callable[[T], V2],
+      item: T,
+) -> V1 | V2:
     """Returns a predicate equal to (it) -> cond1(it) and cond2(it)"""
-    return lambda item: cond1(item) and cond2(item)
+    return cond1(item) and cond2(item)
 
 
-def clamp(lower: T, upper: T) -> Callable[[T], T]:
+def clamp[T](lower: T, upper: T) -> Callable[[T], T]:
     """
     Returns a callable that clamps a value between lower and upper.
     Equivalent to :code:`max(lower, min(item, upper))`
@@ -44,64 +54,89 @@ def clamp(lower: T, upper: T) -> Callable[[T], T]:
     return lambda item: max(lower, min(item, upper))
 
 
-def is_(obj: Any) -> Callable[[Any], bool]:
+@curry
+def instance_of(type_: type | tuple[type, ...], item) -> bool:
+    """Returns True if the given item is an instance of the given types."""
+    return isinstance(item, type_)
+
+
+@curry
+def is_(obj: Any, item: Any) -> bool:
     """Returns a callable that takes a parameter x and returns x is n"""
-    return lambda item: operator.is_(item, obj)
+    return operator.is_(item, obj)
 
 
+@curry
 def is_even(item: int) -> bool:
     """Returns True if the give value is even and False otherwise"""
     return item % 2 == 0
 
 
-def is_congruent(a: int, n: int) -> Callable[[int], bool]:
+@curry
+def is_congruent(a: int, n: int, item: int) -> bool:
     """
     Returns a callable that takes a single integer value. The callable
     returns True of the given integer, i, is congruent a mod m. That is,
     (i - a) mod n == 0
     """
-    return lambda item: (item - a) % n == 0
+    return (item - a) % n == 0
 
 
+@curry
 def is_none(item: Any) -> bool:
     """Returns True if the given item is None"""
     return item is None
 
 
-def is_not(obj: Any) -> Callable[[Any], bool]:
+@curry
+def is_not(obj: Any, item: Any) -> bool:
     """Returns a callable that takes a parameter x and returns x is not n"""
-    return lambda item: operator.is_not(item, obj)
+    return operator.is_not(item, obj)
 
 
+@curry
 def is_not_none(item: Any) -> bool:
     """Returns True if the given item is not None"""
     return item is not None
 
 
+@curry
 def is_odd(item: int) -> bool:
     """Returns True if the give value is odd and False otherwise"""
     return item % 2 == 1
 
 
-def lclamp(lower: T) -> Callable[[T], T]:
+@curry
+def lclamp[T](lower: T, item: T) -> T:
     """
     Returns a callable that left clamps a value with a lower bound.
     Equivalent to :code:`max(lower, item)`
     """
-    return lambda item: max(lower, item)
+    return max(lower, item)
 
 
-def not_(func: Predicate) -> Predicate:
+@curry
+def not_[T](func: Callable[[T], bool], item: T) -> bool:
     """Returns a predicate equal to (it) -> not func(it)"""
-    return lambda item: not func(item)
+    return not func(item)
 
 
-def or_(cond1: Cond1, cond2: Cond2) -> Cond:
+@curry
+def or_[T, V1, V2](
+      cond1: Callable[[T], V1],
+      cond2: Callable[[T], V2],
+      item: T,
+) -> V1 | V2:
     """Returns a predicate equal to (it) -> cond1(it) or cond2(it)"""
-    return lambda item: cond1(item) or cond2(item)
+    return cond1(item) or cond2(item)
 
 
-def raise_(exception: E | EType, *, from_: E | None = nothing):
+@curry
+def raise_[E: Exception | type[Exception]](
+      exception: E,
+      *,
+      from_: E | None = nothing,
+):
     """
     Raise expression. Raises exceptions. If ``from`` is given, will raise the
     exception from that.
@@ -112,7 +147,11 @@ def raise_(exception: E | EType, *, from_: E | None = nothing):
         raise exception from from_
 
 
-def raises(exception: E | EType, *, from_: E | None = nothing):
+def raises[E: Exception | type[Exception]](
+      exception: E,
+      *,
+      from_: E | None = nothing,
+):
     """
     Returns a callable that takes any args or kwargs, and raises the given
     exception. If ``from`` is given, will raise the exception from that.
@@ -120,9 +159,18 @@ def raises(exception: E | EType, *, from_: E | None = nothing):
     return lambda *args, **kwargs: raise_(exception, from_=from_)
 
 
-def rclamp(upper: T) -> Callable[[T], T]:
+@curry
+def rclamp[T](upper: T, item: T) -> T:
     """
     Returns a callable that right clamps a value with an upper bound.
     Equivalent to :code:`min(item, upper)`
     """
-    return lambda item: min(item, upper)
+    return min(item, upper)
+
+
+@curry
+def returns[T](value: T) -> T:
+    """
+    Returns a callable that ignores any parameters and returns the given value
+    """
+    return lambda *args, **kwargs: value

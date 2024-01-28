@@ -15,6 +15,7 @@
    
       and_
       clamp
+      instance_of
       is_
       is_congruent
       is_even
@@ -28,6 +29,7 @@
       raise_
       raises
       rclamp
+      returns
    
    
 

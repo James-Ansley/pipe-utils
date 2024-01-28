@@ -26,6 +26,64 @@ def test_any():
     assert (Pipe([]) | any_(lambda x: x == 2)).get() is False
 
 
+def test_as_tuple():
+    assert as_tuple([1, 2, 3]) == (1, 2, 3)
+    assert as_tuple([1]) == (1,)
+    assert as_tuple("abc") == ("a", "b", "c")
+    assert as_tuple("") == ()
+    assert as_tuple([]) == ()
+    assert as_tuple((1, 2, 3)) == (1, 2, 3)
+
+
+def test_as_tuples():
+    assert (list(as_tuples(["ab", "cd", "ef"])) ==
+            [("a", "b"), ("c", "d"), ("e", "f")])
+    assert list(as_tuples([[1, 2], [3, 4]])) == [(1, 2), (3, 4)]
+    assert list(as_tuples([range(3)])) == [(0, 1, 2)]
+    assert list(as_tuples([])) == []
+    assert list(as_tuples([[]])) == [()]
+    assert list(as_tuples([""])) == [()]
+
+
+def test_as_tuple_of_tuples():
+    assert (as_tuple_of_tuples(["ab", "cd", "ef"]) ==
+            (("a", "b"), ("c", "d"), ("e", "f")))
+    assert as_tuple_of_tuples([[1, 2], [3, 4]]) == ((1, 2), (3, 4))
+    assert as_tuple_of_tuples([range(3)]) == ((0, 1, 2),)
+    assert as_tuple_of_tuples([]) == ()
+    assert as_tuple_of_tuples([[]]) == ((),)
+    assert as_tuple_of_tuples([""]) == ((),)
+
+
+def test_as_list():
+    assert as_list((1, 2, 3)) == [1, 2, 3]
+    assert as_list((1,)) == [1]
+    assert as_list("abc") == ["a", "b", "c"]
+    assert as_list("") == []
+    assert as_list(()) == []
+    assert as_list([1, 2, 3]) == [1, 2, 3]
+
+
+def test_as_lists():
+    assert (list(as_lists(("ab", "cd", "ef"))) ==
+            [["a", "b"], ["c", "d"], ["e", "f"]])
+    assert list(as_lists(((1, 2), (3, 4)))) == [[1, 2], [3, 4]]
+    assert list(as_lists((range(3),))) == [[0, 1, 2]]
+    assert list(as_lists(())) == []
+    assert list(as_lists(((),))) == [[]]
+    assert list(as_lists(("",))) == [[]]
+
+
+def test_as_list_of_lists():
+    assert (as_list_of_lists(("ab", "cd", "ef")) ==
+            [["a", "b"], ["c", "d"], ["e", "f"]])
+    assert as_list_of_lists(((1, 2), (3, 4))) == [[1, 2], [3, 4]]
+    assert as_list_of_lists((range(3),)) == [[0, 1, 2]]
+    assert as_list_of_lists(()) == []
+    assert as_list_of_lists(((),)) == [[]]
+    assert as_list_of_lists(("",)) == [[]]
+
+
 def test_associate():
     assert (Pipe([]) | associate(lambda e: (e, e))).get() == {}
 
@@ -51,64 +109,46 @@ def test_associate_with():
 def test_chunked():
     assert (Pipe([]) | chunked(3) | list).get() == []
     pipe = (
-            Pipe(range(9))
-            | chunked(3)
-            | map_(list)
-            | list
+          Pipe(range(9))
+          | chunked(3)
+          | map_(list)
+          | list
     )
     assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
     pipe = (
-            Pipe(range(10))
-            | chunked(3, partial=True)
-            | map_(list)
-            | list
+          Pipe(range(10))
+          | chunked(3, partial=True)
+          | map_(list)
+          | list
     )
     assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
     pipe = (
-            Pipe(range(10))
-            | chunked(3, strict=False)
-            | map_(list)
-            | list
+          Pipe(range(10))
+          | chunked(3, strict=False)
+          | map_(list)
+          | list
     )
     assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
     pipe = (
-            Pipe(range(10))
-            | chunked(3, strict=False, partial=True)
-            | map_(list)
-            | list
+          Pipe(range(10))
+          | chunked(3, strict=False, partial=True)
+          | map_(list)
+          | list
     )
     assert pipe.get() == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
 
     with raises(ValueError):
-        Pipe([]) | chunked(0)
+        (Pipe([]) | chunked(0) | list).get()
     with raises(ValueError):
-        Pipe([]) | chunked(-1)
+        (Pipe([]) | chunked(-1) | list).get()
     with raises(ValueError):
         (Pipe(range(10)) | chunked(3) | map_(list) | list).get()
 
 
-def test_concat():
-    with pytest.deprecated_call():
-        assert (Pipe([]) | concat([]) | list).get() == []
-        assert (Pipe(["a"]) | concat([]) | list).get() == ["a"]
-        assert (Pipe([]) | concat(["b"]) | list).get() == ["b"]
-        assert (Pipe(["a"]) | concat(["b"]) | list).get() == ["a", "b"]
-        pipe = (Pipe(["a", "b", "c"])
-                | concat(["d", "e", "f"])
-                | list)
-        assert pipe.get() == list("abcdef")
-
-
-def test_concat_after():
-    with pytest.deprecated_call():
-        assert (Pipe([]) | concat_after([]) | list).get() == []
-        assert (Pipe(["a"]) | concat_after([]) | list).get() == ["a"]
-        assert (Pipe([]) | concat_after(["b"]) | list).get() == ["b"]
-        assert (Pipe(["a"]) | concat_after(["b"]) | list).get() == ["b", "a"]
-        pipe = (Pipe(["a", "b", "c"])
-                | concat_after(["d", "e", "f"])
-                | list)
-        assert pipe.get() == list("defabc")
+def test_consume():
+    data = (i for i in range(3))
+    consume(data)
+    assert list(data) == []
 
 
 def test_contains():
@@ -160,7 +200,7 @@ def test_drop():
     assert (Pipe([1, 2, 3]) | drop(4) | list).get() == []
 
     with raises(ValueError):
-        Pipe([]) | drop(-1)
+        (Pipe([]) | drop(-1) | list).get()
 
 
 def test_drop_last():
@@ -176,7 +216,7 @@ def test_drop_last():
     assert (Pipe([1, 2, 3]) | drop_last(4) | list).get() == []
 
     with raises(ValueError):
-        Pipe([]) | drop_last(-1)
+        (Pipe([]) | drop_last(-1) | list).get()
 
 
 def test_drop_last_while():
@@ -260,15 +300,13 @@ def test_find_last():
 
 
 def test_first():
-    assert (Pipe([]) | first() | list).get() == []
-    assert (Pipe([]) | first(5) | list).get() == []
-    assert (Pipe([1, 2, 3]) | first() | list).get() == [1]
-    assert (Pipe([1, 2, 3]) | first(2) | list).get() == [1, 2]
-    assert (Pipe([1, 2, 3]) | first(3) | list).get() == [1, 2, 3]
-    assert (Pipe([1, 2, 3]) | first(4) | list).get() == [1, 2, 3]
+    assert (Pipe([]) | first(default=0)).get() == 0
+    assert (Pipe([1, 2, 3]) | first).get() == 1
+    assert (Pipe([2, 3]) | first(default="X")).get() == 2
+    assert (Pipe([3]) | first).get() == 3
 
-    with raises(ValueError):
-        Pipe([]) | first(-1)
+    with raises(StopIteration):
+        (Pipe([]) | first()).get()
 
 
 def test_flatten():
@@ -317,6 +355,11 @@ def test_get():
         (Pipe("abc") | get(3)).get()
     with raises(IndexError):
         (Pipe("abc") | get(-1)).get()
+
+    assert (Pipe(["a"]) | get(0, default="")).get() == "a"
+    assert (Pipe("abc") | get(1, default="")).get() == "b"
+    assert (Pipe("abc") | get(3, default="")).get() == ""
+    assert (Pipe("abc") | get(-1, default="")).get() == ""
 
 
 def test_get_or_default():
@@ -372,15 +415,12 @@ def test_join_to_str():
 
 
 def test_last():
-    assert (Pipe([]) | last() | list).get() == []
-    assert (Pipe([]) | last(5) | list).get() == []
     assert (Pipe([1, 2, 3]) | last() | list).get() == [3]
-    assert (Pipe([1, 2, 3]) | last(2) | list).get() == [2, 3]
-    assert (Pipe([1, 2, 3]) | last(3) | list).get() == [1, 2, 3]
-    assert (Pipe([1, 2, 3]) | last(4) | list).get() == [1, 2, 3]
+    assert (Pipe([1, 2]) | last() | list).get() == [2]
+    assert (Pipe([1]) | last() | list).get() == [1]
 
-    with raises(ValueError):
-        Pipe([]) | last(-1)
+    with raises(StopIteration):
+        (Pipe([]) | last() | list).get()
 
 
 def test_lstrip():
@@ -439,7 +479,6 @@ def test_pad_with():
     assert [*pad_with("*", 3)([1, 2, 3])] == [1, 2, 3]
     assert [*pad_with("*", 2)([1, 2, 3])] == [1, 2]
     assert [*pad_with("*", 0)([1, 2, 3])] == []
-    assert [*itertools.islice(pad_with("*")([1]), 5)] == [1, "*", "*", "*", "*"]
     assert [*itertools.islice(pad_with("*", None)([1]), 5)] \
            == [1, "*", "*", "*", "*"]
 
@@ -464,7 +503,7 @@ def test_peek():
     res = []
     pipe = (Pipe([0, 0, 1, 2])
             | peek(lambda e, r=res: r.append(e))
-            | first(2)
+            | take(2)
             | list)
     assert res == [0, 0] and pipe.get() == [0, 0]
 
@@ -555,22 +594,33 @@ def test_split_by():
             | map_(list)
             | list
             ).get() == [[1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9]]
-    assert (Pipe([1, 2, 3, -999, 4, 5, 6, 0, 7, 8, 9])
-            | split_by(0, -999)
-            | map_(list)
-            | list
-            ).get() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    assert (Pipe([1, 2, 3, 0, 0, 4, 5, 6, 0, 7, 8, 9])
-            | split_by(0, -999)
-            | map_(list)
-            | list
-            ).get() == [[1, 2, 3], [], [4, 5, 6], [7, 8, 9]]
-
     assert (Pipe([0, 1, 2, 3, 0, 4, 5, 6, 0, 7, 8, 9, 0])
             | split_by(0)
             | map_(list)
             | list
             ).get() == [[], [1, 2, 3], [4, 5, 6], [7, 8, 9], []]
+
+    with pytest.raises(TypeError):
+        Pipe([]) | split_by(3, any_of="10")
+
+
+def test_split_by_any():
+    assert (Pipe([1, 2, 3, 0, 0, 4, 5, 6, 0, 7, 8, 9])
+            | split_by_any((0, -999))
+            | map_(list)
+            | list
+            ).get() == [[1, 2, 3], [], [4, 5, 6], [7, 8, 9]]
+    assert (Pipe([1, 2, 3, -999, 4, 5, 6, 0, 7, 8, 9])
+            | split_by_any((0, -999))
+            | as_list_of_lists
+            ).get() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+
+def test_split_when():
+    assert (Pipe([1, 2, 3, 0, 0, 4, 5, 6, 0, 7, 8, 9])
+            | split_when(it % 2 == 0)
+            | as_list_of_lists
+            ).get() == [[1], [3], [], [], [5], [], [7], [9]]
 
 
 def test_starmap():
@@ -611,31 +661,29 @@ def test_sum_by():
 
 
 def test_take():
-    assert (Pipe([]) | take() | list).get() == []
     assert (Pipe([]) | take(0) | list).get() == []
     assert (Pipe([]) | take(10) | list).get() == []
     assert (Pipe([1, 2, 3]) | take(0) | list).get() == []
-    assert (Pipe([1, 2, 3]) | take() | list).get() == [1]
+    assert (Pipe([1, 2, 3]) | take(1) | list).get() == [1]
     assert (Pipe([1, 2, 3]) | take(2) | list).get() == [1, 2]
     assert (Pipe([1, 2, 3]) | take(3) | list).get() == [1, 2, 3]
     assert (Pipe([1, 2, 3]) | take(10) | list).get() == [1, 2, 3]
 
     with raises(ValueError):
-        Pipe([]) | take(-1)
+        (Pipe([]) | take(-1) | list).get()
 
 
 def test_take_last():
-    assert (Pipe([]) | take_last() | list).get() == []
     assert (Pipe([]) | take_last(0) | list).get() == []
     assert (Pipe([]) | take_last(10) | list).get() == []
     assert (Pipe([1, 2, 3]) | take_last(0) | list).get() == []
-    assert (Pipe([1, 2, 3]) | take_last() | list).get() == [3]
+    assert (Pipe([1, 2, 3]) | take_last(1) | list).get() == [3]
     assert (Pipe([1, 2, 3]) | take_last(2) | list).get() == [2, 3]
     assert (Pipe([1, 2, 3]) | take_last(3) | list).get() == [1, 2, 3]
     assert (Pipe([1, 2, 3]) | take_last(10) | list).get() == [1, 2, 3]
 
     with raises(ValueError):
-        Pipe([]) | take_last(-1)
+        (Pipe([]) | take_last(-1) | list).get()
 
 
 def test_take_last_while():
@@ -677,17 +725,19 @@ def test_transpose():
 
 def test_try_map():
     pipe = (Pipe([])
-            | try_map(lambda x: 1 / x, ZeroDivisionError, default=0)
+            | try_map(lambda x: 1 / x, catch=ZeroDivisionError, default=0)
             | list)
     assert pipe.get() == []
     pipe = (Pipe(range(1, 3))
             | map_(Fraction)
-            | try_map(lambda x: 1 / x, ZeroDivisionError, default=Fraction(0))
+            | try_map(lambda x: 1 / x, catch=ZeroDivisionError,
+                      default=Fraction(0))
             | list)
     assert pipe.get() == [Fraction(1, 1), Fraction(1, 2)]
     pipe = (Pipe(range(-1, 2))
             | map_(Fraction)
-            | try_map(lambda x: 1 / x, ZeroDivisionError, default=Fraction(0))
+            | try_map(lambda x: 1 / x,
+                      catch=ZeroDivisionError, default=Fraction(0))
             | list)
     assert pipe.get() == [Fraction(-1, 1), Fraction(0, 1), Fraction(1, 1)]
     pipe = (Pipe(range(-1, 2))
@@ -699,7 +749,7 @@ def test_try_map():
     with raises(ZeroDivisionError):
         (Pipe(range(-1, 2))
          | map_(Fraction)
-         | try_map(lambda x: 1 / x, IndexError, default=Fraction(0))
+         | try_map(lambda x: 1 / x, catch=IndexError, default=Fraction(0))
          | list).get()
 
 

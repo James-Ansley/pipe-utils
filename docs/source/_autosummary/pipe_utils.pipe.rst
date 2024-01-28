@@ -9,7 +9,9 @@
 
    .. autosummary::
    
+      P
       it
+      obj
    
    
 
@@ -24,7 +26,9 @@
    .. autosummary::
    
       Catch
+      P
       Pipe
+      PipeMeta
       Then
    
    

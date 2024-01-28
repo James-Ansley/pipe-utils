@@ -4,11 +4,12 @@ from io import StringIO
 import pytest
 
 from pipe_utils import Pipe, it, map_
-from pipe_utils.pipe import Catch, Then
+from pipe_utils.pipe import Catch, Then, obj
 
 
 def test_pipe_yields_data():
     assert Pipe(5).get() == 5
+    assert (Pipe >> 5).get() == 5
     assert Pipe([1, 2, 3]).get_or_default([2, 4, 8]) == [1, 2, 3]
     assert Pipe("Hello").get_or_raise(ValueError) == "Hello"
 
@@ -156,3 +157,7 @@ def test_get_or_raise_controls_error_chaining():
         )
     assert isinstance(e.value.__cause__, ZeroDivisionError)
     assert str(e.value) == "Oops!"
+
+
+def test_obj():
+    assert obj.upper()("hello") == "HELLO"
