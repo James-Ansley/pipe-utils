@@ -6,7 +6,7 @@ from operator import add
 import pytest
 from pytest import raises
 
-from pipe_utils import Pipe, it
+from pipe_utils import P, Pipe, it
 from pipe_utils.iterables import *
 
 
@@ -166,10 +166,10 @@ def test_contains_all():
 
 
 def test_count():
-    assert (Pipe([]) | count(0)).get() == 0
-    assert (Pipe([-1, 1]) | count(0)).get() == 0
-    assert (Pipe([-1, 0, 1]) | count(0)).get() == 1
-    assert (Pipe([-1, 0, 1, 0, 0]) | count(0)).get() == 3
+    assert (Pipe([]) | count(it == 0)).get() == 0
+    assert (Pipe([-1, 1]) | count(it == 0)).get() == 0
+    assert (Pipe([-1, 0, 1]) | count(it == 0)).get() == 1
+    assert (Pipe([-1, 0, 1, 0, 0]) | count(it == 0)).get() == 3
 
 
 def test_distinct():
@@ -236,6 +236,14 @@ def test_drop_while():
     assert (Pipe([0, 0, 0]) | drop_while(is_even) | list).get() == []
 
 
+def test_enumerated():
+    assert (Pipe([]) | enumerated | as_list).get() == []
+    assert (Pipe([1]) | enumerated | as_list).get() == [(0, 1)]
+    assert (Pipe([1, 2, 3]) | enumerated | as_list).get() \
+           == [(0, 1), (1, 2), (2, 3)]
+    assert (Pipe([1]) | enumerated(start=1) | as_list).get() == [(1, 1)]
+
+
 def test_extend():
     assert (Pipe([]) | extend([]) | list).get() == []
     assert (Pipe(["a"]) | extend([]) | list).get() == ["a"]
@@ -285,6 +293,12 @@ def test_filter_indexed():
     assert [*filter_indexed(lambda i, e: i % 2 == 0 and e > 0)([])] == []
     assert [*filter_indexed(lambda i, e: i % 2 == 0 and e > 0, start=1)(data)] \
            == [2, 3]
+
+
+def test_filter_indices():
+    assert (Pipe([]) | filter_indices(is_even) | list).get() == []
+    pipe = Pipe([1, 2, 2, 3, 4]) | filter_indices(is_even) | list
+    assert pipe.get() == [1, 2, 4]
 
 
 def test_find():
@@ -395,6 +409,11 @@ def test_index_of_last():
     assert (Pipe(["a", "b", "a", "c"]) | index_of_last("a")).get() == 2
     with raises(IndexError):
         (Pipe(["a", "b", "a"]) | index_of_last("c")).get()
+
+
+def test_iter_reverse():
+    assert (P([1, 2, 3]) | iter_reverse | as_list).get() == [3, 2, 1]
+    assert (P(e for e in [1, 2, 3]) | iter_reverse | as_list).get() == [3, 2, 1]
 
 
 def test_join_to_str():

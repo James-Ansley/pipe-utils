@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0]
+
+### Additions
+
+- `kwarged` function in the `mappings` module to call functions with keyword
+  arguments (similar to `starred` in `iterables`)
+- `unwrap` singleton that unwraps pipes (equivalent to `.get()`)
+- `enumerated`, curried version of `enumerate` builtin
+- `iter_reverse`, reverses Iterators rather than just reversible functions.
+
+### Changes
+
+- `count` in the iterables module now takes a predicate instead of a value
+- Using iterables, `Then`, and `Catch` on the RHS of the pipe (`|`) operator is
+  now deprecated and will be removed in later versions.
+
 ## [0.4.0]
 
 ### Additions
@@ -158,6 +174,8 @@ All notable changes to this project will be documented in this file.
 - `map_keys`, `map_values`, `filter_keys`, `filter_values`, `get_value`,
   `get_value_or_default` functions in the `mappings` module
 - `utils` module that imports `Pipe`, `Then` and all utility functions
+
+[0.5.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.4.0...v0.5.0
 
 [0.4.0]: https://github.com/James-Ansley/pipe-utils/compare/v0.3.0...v0.4.0
 

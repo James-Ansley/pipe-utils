@@ -3,7 +3,7 @@ from collections.abc import ItemsView, KeysView, ValuesView
 import pytest
 from pytest import raises
 
-from pipe_utils import as_list, it
+from pipe_utils import it
 from pipe_utils.mappings import *
 from pipe_utils.values import is_even, is_odd, returns
 
@@ -86,6 +86,12 @@ def test_key_view():
     assert isinstance(keys, KeysView) and list(keys) == []
     keys = key_view({1: "a", 2: "b"})
     assert list(keys) == [1, 2]
+
+
+def test_kwarged():
+    data = {"a": 1, "b": 2, "c": 3}
+    assert kwarged(lambda a, b, c: f"{a}{b}{c}", data) == "123"
+    assert kwarged(lambda **kwargs: kwargs, data) == data
 
 
 def test_map_keys():

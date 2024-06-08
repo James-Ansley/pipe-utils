@@ -38,9 +38,11 @@ __all__ = [
     "drop_while",
     "extend",
     "extend_left",
+    "enumerated",
     "filter_",
     "filter_false",
     "filter_indexed",
+    "filter_indices",
     "find",
     "find_last",
     "first",
@@ -55,6 +57,7 @@ __all__ = [
     "is_not_empty",
     "index_of",
     "index_of_last",
+    "iter_reverse",
     "join_to_str",
     "last",
     "lstrip",
@@ -241,12 +244,12 @@ def contains_all[T](values: Iterable[T], data: Iterable[T]) -> bool:
 
 
 @curry
-def count[T](value: T, data: Iterable[T]) -> int:
+def count[T](predicate: Callable[[T], bool], data: Iterable[T]) -> int:
     """
     Returns a callable that returns the number of occurrences of value in a
     given iterable
     """
-    return sum(e == value for e in data)
+    return sum(predicate(e) for e in data)
 
 
 @curry
@@ -338,6 +341,11 @@ def drop_while[T](func: Callable[[T], bool], data: Iterable[T]) -> Iterable[T]:
 
 
 @curry
+def enumerated[T](data: Iterable[T], start: int = 0) -> Iterable[tuple[int, T]]:
+    return enumerate(data, start=start)
+
+
+@curry
 def extend[T](other: Iterable[T], data: Iterable[T]) -> Iterable[T]:
     """Returns a callable that yields ≈ [\\*data, \\*other]"""
     return itertools.chain(data, other)
@@ -401,6 +409,23 @@ def filter_indexed[T](
     for i, e in data:
         if func(i, e):
             yield e
+
+
+@curry
+def filter_indices[T](
+      func: Callable[[T], bool],
+      data: Iterable[T],
+      *,
+      start: int = 0,
+) -> Iterable[int]:
+    """
+    Yields those indices, based on the given start value, of an iterable where
+    the predicate is satisfied.
+    """
+    data = enumerate(data, start=start)
+    for i, e in data:
+        if func(e):
+            yield i
 
 
 @curry
@@ -576,6 +601,14 @@ def index_of_last[T](value: T, data: Iterable[T]) -> int:
     if len(q) == 0:
         raise IndexError("Value is not in the iterable")
     return q.pop()
+
+
+@curry
+def iter_reverse[T](data: Iterable[T]) -> Iterable[T]:
+    if isinstance(data, Reversible):
+        return reversed(data)
+    else:
+        return reversed(tuple(data))
 
 
 @curry

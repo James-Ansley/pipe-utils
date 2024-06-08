@@ -17,6 +17,13 @@
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      piped
+      unwrap
+   
    
 
    
@@ -30,6 +37,7 @@
       Pipe
       PipeMeta
       Then
+      UnwrappedApply
    
    
 

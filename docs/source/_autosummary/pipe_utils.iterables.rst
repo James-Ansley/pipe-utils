@@ -34,11 +34,13 @@
       drop_last
       drop_last_while
       drop_while
+      enumerated
       extend
       extend_left
       filter_
       filter_false
       filter_indexed
+      filter_indices
       find
       find_last
       first
@@ -53,6 +55,7 @@
       index_of_last
       is_empty
       is_not_empty
+      iter_reverse
       join_to_str
       last
       lstrip

@@ -8,7 +8,7 @@ Pipe-Utils also defines several utility functions in the :mod:`pipe_utils.iterab
 Install
 -------
 
-To install qChecker use the following command::
+To install pipe-utils use the following command::
 
     pip install pipe-utils
 
@@ -23,7 +23,9 @@ Data first needs to be wrapped in a :class:`pipe_utils.Pipe`::
     data = "I think pipes are cool"
     pipe = Pipe(data)
 
-Operations can then be chained, before the result of the operation is retrieved with :code:`.get()`, :code:`.get_or_default(...)`, or :code:`.get_or_raise(...)`::
+Operations can then be chained, before the result of the operation is retrieved
+with :code:`.get()`, :code:`.get_or_default(...)`, or :code:`.get_or_raise(...)`
+or, with the :code:`unwrap` singleton::
 
     from pipe_utils import Pipe
 
@@ -34,7 +36,8 @@ Operations can then be chained, before the result of the operation is retrieved 
             | str.lower
             | str.split
             | sorted
-    ).get()
+            | unwrap
+    )
 
     print(result)
 
@@ -63,7 +66,8 @@ For example::
             | str.split
             | group_by(len)
             | sorted_dict()
-    ).get()
+            | unwrap
+    )
 
     print(result)
 
@@ -91,7 +95,7 @@ counterparts::
             Pipe(data)
             | filter(all(it >= 0))
             | map(sum_by(it * it))
-            | list
-    ).get()
+            | unwrap(as_list)
+    )
 
     print(result)  # [14, 29]

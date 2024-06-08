@@ -26,7 +26,8 @@ result = (
       | obj.split()
       | group_by(len)
       | sorted_dict()
-).get()
+      | unwrap
+)
 
 print(result)
 #  {1: ['i'], 3: ['are'], 4: ['just', 'neat'], 5: ['think', 'pipes']}
@@ -44,14 +45,14 @@ result = (
       Pipe(data)
       | filter(all(it >= 0))
       | map(sum_by(it * it))
-      | as_list
-).get()
+      | unwrap(as_list)
+)
 
 print(result)  # [14, 29]
 ```
 
 And, if you're feeling extra dangerous, you can use arrow syntax to clean up
-some of those brackets (and the `P` pipe alias):
+some of those brackets:
 
 ```python
 from pipe_utils.override import *
@@ -59,11 +60,11 @@ from pipe_utils.override import *
 data = [[1, -3, 4], [1, 2, 3], [2, 3, 4], [5, -1, 4]]
 
 result = (
-      P >> data
+      Pipe >> data
       | filter >> all(it >= 0)
       | map >> sum_by(it * it)
-      | as_list
-).get()
+      | unwrap >> as_list
+)
 
 print(result)  # [14, 29]
 ```

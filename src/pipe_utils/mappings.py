@@ -19,6 +19,7 @@ __all__ = [
     "get_value_or_default",
     "item_view",
     "key_view",
+    "kwarged",
     "map_keys",
     "map_values",
     "melt",
@@ -133,6 +134,15 @@ def item_view[K, V](data: Mapping[K, V]) -> ItemsView[K, V]:
 def key_view[K](data: Mapping[K, ...]) -> KeysView[K]:
     """returns the mapping keys view"""
     return data.keys()
+
+
+@curry
+def kwarged[T, V](func: Callable[[...], V], data: Mapping[str, T]) -> V:
+    """
+    Calls the given function with the data as kwargs.
+    Equivalent to func(**data)
+    """
+    return func(**data)
 
 
 @curry

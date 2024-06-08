@@ -21,6 +21,7 @@
       get_value_or_default
       item_view
       key_view
+      kwarged
       map_keys
       map_values
       melt

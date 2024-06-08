@@ -46,8 +46,8 @@ call functions using the ``>>`` right shift operator.::
           P >> data
           | filter >> all(it >= 0)
           | map >> sum_by(it * it)
-          | as_list
-    ).get()
+          | unwrap >> as_list
+    )
 
     print(result)  # [14, 29]
 

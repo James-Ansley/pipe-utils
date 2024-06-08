@@ -1,12 +1,16 @@
 """Exports the Pipe, Then, and it objects/classes"""
-
+import warnings
 from collections.abc import Callable, Iterable
+from functools import wraps
 from operator import attrgetter
 from typing import Self, Type, TypeVar
 
-from ._types import E, EType, ExceptionHandler
+from deprecated.sphinx import deprecated
 
-__all__ = ["Then", "Catch", "Pipe", "P", "it", "obj"]
+from ._types import E, EType, ExceptionHandler
+from .curry import curry
+
+__all__ = ["Then", "Catch", "Pipe", "P", "it", "obj", "piped", "unwrap"]
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -14,6 +18,29 @@ V = TypeVar("V")
 _Args = "Callable[[T], R] | Iterable[Callable[[T], R], ...] | Then"
 
 
+class UnwrappedApply:
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, data):
+        return self.func(data)
+
+
+@curry
+def unwrap[K, V](func: Callable[[K], V] = lambda e: e):
+    """
+    Unwraps a Pipe when called on the RHS of a pipe operation. Can optionally
+    be given a function to apply to the unwrapped value. e.g.::
+
+        Pipe([1, 2, 3]) | unwrap >> as_tuple == (1, 2, 3)
+    """
+    return UnwrappedApply(func)
+
+
+@deprecated(
+    version="0.4.1",
+    reason="Then is deprecated in favour of using utility functions"
+)
 class Then:
     """
     Container class used to store a func along with additional args and kwargs.
@@ -30,6 +57,10 @@ class Then:
         self.kwargs = kwargs
 
 
+@deprecated(
+    version="0.4.1",
+    reason="Catch is deprecated in favour of using utility functions"
+)
 class Catch:
     """
     Container class used to store exceptions and an exception handler.
@@ -86,14 +117,36 @@ class Pipe[T](metaclass=PipeMeta):
         except Exception as e:
             return Pipe._from_err(e)
 
-    def __or__(self, other: _Args) -> "Pipe[R]":
-        if isinstance(other, Callable):
+    def __or__(self, other: _Args) -> "Pipe[R] | R":
+        if other is unwrap:
+            return self.get()
+        elif isinstance(other, UnwrappedApply):
+            return other(self.get())
+        elif isinstance(other, Callable):
             return self.then(other)
         elif isinstance(other, Iterable):
+            warnings.warn(
+                "Iterable RHS in Pipes no longer supported "
+                "and will be removed in future versions",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return self.then(*other)
         elif isinstance(other, Then):
+            warnings.warn(
+                "Then RHS in Pipes no longer supported "
+                "and will be removed in future versions",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return self.then(other.func, *other.args, **other.kwargs)
         elif isinstance(other, Catch):
+            warnings.warn(
+                "Catch RHS in Pipes no longer supported "
+                "and will be removed in future versions",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             return self.catch(other.exception, other.handler)
         else:
             raise ValueError(f"cannot perform pipe with type {type(other)}")
@@ -561,3 +614,11 @@ class _Obj[T, V]:
 #: .. warning::
 #:     :code:`obj` objects can **NOT** be used for chained method calls
 obj = _Obj()
+
+
+def piped[T, R](func: Callable[[Pipe[T]], Pipe[R]]) -> Callable[[T], R]:
+    @wraps(func)
+    def decorator(data: T) -> R:
+        return func(Pipe >> data).get()
+
+    return decorator
